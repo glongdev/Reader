@@ -8,6 +8,8 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.glong.reader.config.ReaderConfig;
 import com.glong.reader.textconvert.ShowChar;
@@ -25,39 +27,46 @@ import java.util.Locale;
  * contact me krouky@outlook.com
  */
 public class ReaderResolve {
+    private static final String TAG = ReaderResolve.class.getSimpleName();
 
-    //本章中页码
-    private int mPageIndex;
+    private boolean mInitialized = false;
+
+    public static final int LAST_INDEX = -1;//表示最后一个
+    public static final int FIRST_INDEX = 0;//表示第一个
 
     //本章在总章节中的索引
-    private int mChapterIndex;
+    protected int mChapterIndex;
 
     //当前页第一个字符在本章中
-    private int mCharIndex;
+    protected int mCharIndex;
 
-    //当前章节总页数，页数根据文字间距，字体大小而变化
-    private int mPageSum;
 
     //当前章节的文字内容(正文)
-    private String mContent;
+    protected String mContent;
 
     //当前章节标题
-    private String mTitle;
+    protected String mTitle;
 
     // 总章节数
-    private int mChapterSum;
+    protected int mChapterSum;
 
     private int mAreaWidth;
     private int mAreaHeight;
 
     /***************************人工智能分割线 外部设置的属性end************************/
 
-    private List<ShowLine> mShowLines;
-    private List<ShowLine> mChapterNameLines;
+    //当前章节总页数，页数根据文字间距，字体大小而变化
+    protected int mPageSum;
 
-    private int mLineNumPerPageWithoutFirstPage;//一页能展示多少行（除第0页）
-    private int mLineNumPerPageInFirstPage;//一页能展示多少行（第0页）
-    private int mChapterTitleHeight;//第0页大章节名称所占高度
+    //本章中页码
+    protected int mPageIndex;
+
+    protected List<ShowLine> mShowLines;
+    protected List<ShowLine> mChapterNameLines;
+
+    protected int mLineNumPerPageWithoutFirstPage;//一页能展示多少行（除第0页）
+    protected int mLineNumPerPageInFirstPage;//一页能展示多少行（第0页）
+    protected int mChapterTitleHeight;//第0页大章节名称所占高度
 
     /****************************通过计算的属性end*************************************/
 
@@ -65,9 +74,9 @@ public class ReaderResolve {
     private Paint mMarginPaint = new Paint(Paint.ANTI_ALIAS_FLAG);//画边缘的画笔，如：页码、章节名称、电池等
     private Paint mChapterPaint = new Paint(Paint.ANTI_ALIAS_FLAG);// 画章节名称的Paint
 
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", Locale.CHINA);
+    protected SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", Locale.CHINA);
 
-    private DecimalFormat decimalFormat = new DecimalFormat("#0.00");
+    protected DecimalFormat decimalFormat = new DecimalFormat("#0.00");
 
     /**
      * 界面布局配置，此处依赖{@link ReaderConfig}是因为需要使用TextSize计算总页数
@@ -75,6 +84,13 @@ public class ReaderResolve {
     private ReaderConfig mReaderConfig;
 
     public ReaderResolve() {
+        // set a default ReaderConfig
+        mReaderConfig = new ReaderConfig.Builder().build();
+        initPaints();
+    }
+
+    public ReaderResolve(@NonNull ReaderConfig readerConfig) {
+        this.mReaderConfig = readerConfig;
         initPaints();
     }
 
@@ -86,7 +102,7 @@ public class ReaderResolve {
         mChapterPaint.setColor(mReaderConfig.getReaderBackground().getTextColor());
 
         mMarginPaint.setColor(mReaderConfig.getReaderBackground().getTextColor());
-        mMarginPaint.setTextSize(30);
+        mMarginPaint.setTextSize(40);
     }
 
 
@@ -104,8 +120,6 @@ public class ReaderResolve {
         //除边缘区域外的区域高度
         int usableHeight = mAreaHeight - paddingTop - paddingBottom;
 
-        //正文所占行数
-        mShowLines = TextUtils.breakToLineList(mContent, usableWidth, 0, mMainBodyPaint);
 
         //计算大标题所占行数
         mChapterNameLines = TextUtils.breakToLineList(mTitle, usableWidth, 0, mChapterPaint);
@@ -121,17 +135,30 @@ public class ReaderResolve {
         //第0页 能展示多少行正文
         mLineNumPerPageInFirstPage = TextUtils.measureLines(usableHeight - mChapterTitleHeight, mReaderConfig.getLineSpace(), mMainBodyPaint);
 
+        //正文所占行数
+        if (!android.text.TextUtils.isEmpty(mContent)) {
+            mShowLines = TextUtils.breakToLineList(mContent, usableWidth, 0, mMainBodyPaint);
+        }
+
         //计算总页数
-        mPageSum = mShowLines.size() - mLineNumPerPageInFirstPage == 0 ?
-                1 : ((mShowLines.size() - mLineNumPerPageInFirstPage) - 1) / Math.max(1, mLineNumPerPageWithoutFirstPage) + 1 + 1;
+        if (mShowLines != null) {
+            mPageSum = mShowLines.size() - mLineNumPerPageInFirstPage == 0 ?
+                    1 : ((mShowLines.size() - mLineNumPerPageInFirstPage) - 1) / Math.max(1, mLineNumPerPageWithoutFirstPage) + 1 + 1;
+        } else {
+            mPageSum = -1;
+        }
     }
 
-    void drawPage(Canvas canvas) {
+    public void drawPage(Canvas canvas) {
+        Log.d(TAG, "start drawPage,title:" + mTitle + " ,content:" + mContent);
+//        if (!mInitialized) {
+//            Log.d(TAG, "No initialization calculation yet, bounce method!");
+//        }
         if (mTitle != null) {
             drawMarginArea(canvas);
             maybeDrawChapterTitle(canvas);
         }
-        if (mContent != null) {
+        if (mShowLines != null) {
             drawMainBodyArea(canvas);
         }
     }
@@ -250,5 +277,81 @@ public class ReaderResolve {
             rightPosition = x + showChar.charWidth;
             showChar.rectF = new RectF(x, topPosition, rightPosition, bottomPosition);
         }
+    }
+
+    public int getPageIndex() {
+        return mPageIndex;
+    }
+
+    public void setPageIndex(int pageIndex) {
+        mPageIndex = pageIndex;
+    }
+
+    public int getChapterIndex() {
+        return mChapterIndex;
+    }
+
+    public void setChapterIndex(int chapterIndex) {
+        mChapterIndex = chapterIndex;
+    }
+
+    public int getPageSum() {
+        return mPageSum;
+    }
+
+    public void setPageSum(int pageSum) {
+        mPageSum = pageSum;
+    }
+
+    public int getChapterSum() {
+        return mChapterSum;
+    }
+
+    public void setChapterSum(int chapterSum) {
+        mChapterSum = chapterSum;
+    }
+
+    public int getCharIndex() {
+        return mCharIndex;
+    }
+
+    public void setCharIndex(int charIndex) {
+        mCharIndex = charIndex;
+    }
+
+    public void setArea(int areaWidth, int areaHeight) {
+        this.mAreaWidth = areaWidth;
+        this.mAreaHeight = areaHeight;
+    }
+
+    public String getTitle() {
+        return mTitle;
+    }
+
+    public void setTitle(@NonNull String title) {
+        if (!title.equals(mTitle)) {
+            mTitle = title;
+            calculateChapterParameter();
+        }
+    }
+
+    public String getContent() {
+        return mContent;
+    }
+
+    public void setContent(@NonNull String content) {
+//        if (!content.equalsIgnoreCase(mContent)) {
+        mContent = content;
+        calculateChapterParameter();
+//        }
+    }
+
+    public ReaderConfig getReaderConfig() {
+        return mReaderConfig;
+    }
+
+    public void setReaderConfig(@NonNull ReaderConfig readerConfig) {
+        mReaderConfig = readerConfig;
+        initPaints();
     }
 }

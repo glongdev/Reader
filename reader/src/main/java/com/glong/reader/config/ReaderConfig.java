@@ -55,11 +55,11 @@ public class ReaderConfig {
 
     public static class Builder {
 
-        private int mTextSize = 40;
+        private int mTextSize = 60;
 
         private int[] mPadding = {40, 80, 40, 80};
 
-        private int mLineSpace = 20;
+        private int mLineSpace = 50;
 
         private ReaderBackground mReaderBackground = new ReaderBackground(new ColorDrawable(Color.WHITE), Color.BLACK);
 

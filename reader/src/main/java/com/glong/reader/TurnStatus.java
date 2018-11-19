@@ -22,14 +22,19 @@ public enum TurnStatus {
     LOAD_FAILURE,
 
     /**
-     * 没有下一页
+     * 下载中
      */
-    NO_NEXT_PAGE,
+    DOWNLOADING,
 
-    /**
-     * 没有上一页
-     */
-    NO_PREV_PAGE,
+//    /**
+//     * 没有下一页
+//     */
+//    NO_NEXT_PAGE,
+//
+//    /**
+//     * 没有上一页
+//     */
+//    NO_PREV_PAGE,
 
     /**
      * 没有下一章

@@ -10,6 +10,22 @@ public abstract class Cache {
 
     private File mCacheDir;
 
+    /**
+     * 缓存章节数
+     */
+    private int mCacheNumber = 3;
+
+    public Cache(File cacheDir) {
+        checkIsDirectory(cacheDir);
+        this.mCacheDir = cacheDir;
+    }
+
+    private void checkIsDirectory(File cacheDir) {
+        if (!cacheDir.isDirectory()) {
+            throw new IllegalArgumentException("cacheDir must be a directory!");
+        }
+    }
+
     public abstract void put(String key, String value);
 
     public abstract <T> void put(String key, T t);
@@ -18,11 +34,20 @@ public abstract class Cache {
 
     public abstract <T> T get(String key, Class<T> clazz);
 
-    public File getmCacheDir() {
+    public File getCacheDir() {
         return mCacheDir;
     }
 
-    public void setmCacheDir(File mCacheDir) {
-        this.mCacheDir = mCacheDir;
+    public void setCacheDir(File cacheDir) {
+        checkIsDirectory(cacheDir);
+        this.mCacheDir = cacheDir;
+    }
+
+    public int getCacheNumber() {
+        return mCacheNumber;
+    }
+
+    public void setCacheNumber(int cacheNumber) {
+        mCacheNumber = cacheNumber;
     }
 }
