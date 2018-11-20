@@ -9,6 +9,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.glong.reader.config.ReaderConfig;
@@ -33,6 +34,7 @@ public class ReaderResolve {
 
     public static final int LAST_INDEX = -1;//表示最后一个
     public static final int FIRST_INDEX = 0;//表示第一个
+    public static final int UNKOWN = -2;//未知，在实际翻页时动态计算
 
     //本章在总章节中的索引
     protected int mChapterIndex;
@@ -42,7 +44,7 @@ public class ReaderResolve {
 
 
     //当前章节的文字内容(正文)
-    protected String mContent;
+    protected String mContent = "";
 
     //当前章节标题
     protected String mTitle;
@@ -120,20 +122,20 @@ public class ReaderResolve {
         //除边缘区域外的区域高度
         int usableHeight = mAreaHeight - paddingTop - paddingBottom;
 
+        if (!android.text.TextUtils.isEmpty(mTitle)) {
+            //计算大标题所占行数
+            mChapterNameLines = TextUtils.breakToLineList(mTitle, usableWidth, 0, mChapterPaint);
 
-        //计算大标题所占行数
-        mChapterNameLines = TextUtils.breakToLineList(mTitle, usableWidth, 0, mChapterPaint);
-
-        //正常情况下（除第0页）一页能展示多少行
-        mLineNumPerPageWithoutFirstPage = TextUtils.measureLines(usableHeight, mReaderConfig.getLineSpace(), mMainBodyPaint);
-        //第0页内容行数
-
-        //计算第0页大章节标题所占高度
-        Paint.FontMetrics chapterFM = mChapterPaint.getFontMetrics();
-        mChapterTitleHeight = (int) (mChapterNameLines.size() * (chapterFM.bottom - chapterFM.top + mReaderConfig.getLineSpace()) * 1.5f);
+            //计算第0页大章节标题所占高度
+            Paint.FontMetrics chapterFM = mChapterPaint.getFontMetrics();
+            mChapterTitleHeight = (int) (mChapterNameLines.size() * (chapterFM.bottom - chapterFM.top + mReaderConfig.getLineSpace()) * 1.5f);
+        }
 
         //第0页 能展示多少行正文
         mLineNumPerPageInFirstPage = TextUtils.measureLines(usableHeight - mChapterTitleHeight, mReaderConfig.getLineSpace(), mMainBodyPaint);
+
+        //正常情况下（除第0页）一页能展示多少行
+        mLineNumPerPageWithoutFirstPage = TextUtils.measureLines(usableHeight, mReaderConfig.getLineSpace(), mMainBodyPaint);
 
         //正文所占行数
         if (!android.text.TextUtils.isEmpty(mContent)) {
@@ -144,8 +146,48 @@ public class ReaderResolve {
         if (mShowLines != null) {
             mPageSum = mShowLines.size() - mLineNumPerPageInFirstPage == 0 ?
                     1 : ((mShowLines.size() - mLineNumPerPageInFirstPage) - 1) / Math.max(1, mLineNumPerPageWithoutFirstPage) + 1 + 1;
+            calculatePageIndex();
         } else {
             mPageSum = -1;
+        }
+    }
+
+    /**
+     * 根据字符索引计算页码
+     */
+    private void calculatePageIndex() {
+        if (mCharIndex == FIRST_INDEX) {
+            mPageIndex = 0;
+        } else if (mCharIndex == LAST_INDEX) {
+            mPageIndex = mPageSum - 1;
+        } else {
+            //step 1.计算当前字符索引在哪一行
+
+            // 为了提升效率，如果字符索引在mContent.length()后半部分，则从后半部分遍历
+            int lineIndex = 0;
+            if (mCharIndex >= mContent.length() / 2) {
+                for (int i = mPageSum - 1; i >= 0; --i) {
+                    ShowLine showLine = mShowLines.get(i);
+                    if (mCharIndex >= showLine.getLineFirstIndexInChapter() && mCharIndex <= showLine.getLineLastIndexInChapter()) {
+                        lineIndex = i;
+                        break;
+                    }
+                }
+            } else {
+                for (int i = 0; i <= mPageSum - 1; i++) {
+                    ShowLine showLine = mShowLines.get(i);
+                    if (mCharIndex >= showLine.getLineFirstIndexInChapter() && mCharIndex <= showLine.getLineLastIndexInChapter()) {
+                        lineIndex = i;
+                        break;
+                    }
+                }
+            }
+            //step 2.计算lineIndex在哪一页
+            if (lineIndex <= mLineNumPerPageInFirstPage - 1) {
+                mPageIndex = 0;
+            } else {
+                mPageIndex = (lineIndex - mLineNumPerPageInFirstPage) / mLineNumPerPageWithoutFirstPage + 1;
+            }
         }
     }
 
@@ -185,9 +227,11 @@ public class ReaderResolve {
         canvas.drawText(mTitle, mReaderConfig.getPadding()[0], mReaderConfig.getPadding()[1], mMarginPaint);
 
         //step3.在边缘区域画页码
-        String pageNumber = String.valueOf((mPageIndex + 1) + "/" + mPageSum);
-        canvas.drawText(pageNumber, mAreaWidth - mReaderConfig.getPadding()[2] - mMarginPaint.measureText(pageNumber)
-                , mReaderConfig.getPadding()[1], mMarginPaint);
+        if (mPageSum != -1) {//mPageSum == -1 代表当前页的内容为空
+            String pageNumber = String.valueOf((mPageIndex + 1) + "/" + mPageSum);
+            canvas.drawText(pageNumber, mAreaWidth - mReaderConfig.getPadding()[2] - mMarginPaint.measureText(pageNumber)
+                    , mReaderConfig.getPadding()[1], mMarginPaint);
+        }
 
         //step4.在边缘区域画时间
         Paint.FontMetrics fm = mMarginPaint.getFontMetrics();
@@ -320,8 +364,10 @@ public class ReaderResolve {
     }
 
     public void setArea(int areaWidth, int areaHeight) {
+        Log.d(TAG, "areaWidth:" + areaWidth + ",areaHeight:" + areaHeight);
         this.mAreaWidth = areaWidth;
         this.mAreaHeight = areaHeight;
+        calculateChapterParameter();
     }
 
     public String getTitle() {
@@ -331,7 +377,7 @@ public class ReaderResolve {
     public void setTitle(@NonNull String title) {
         if (!title.equals(mTitle)) {
             mTitle = title;
-            calculateChapterParameter();
+//            calculateChapterParameter();
         }
     }
 
@@ -339,11 +385,12 @@ public class ReaderResolve {
         return mContent;
     }
 
-    public void setContent(@NonNull String content) {
-//        if (!content.equalsIgnoreCase(mContent)) {
+    public void setContent(@Nullable String content) {
+        if (content == null) {
+            mShowLines = null;
+        }
         mContent = content;
         calculateChapterParameter();
-//        }
     }
 
     public ReaderConfig getReaderConfig() {

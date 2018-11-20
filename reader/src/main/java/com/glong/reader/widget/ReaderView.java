@@ -10,8 +10,9 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
-import com.glong.reader.ReaderUtils;
+import com.glong.reader.ReaderSparseBooleanArray;
 import com.glong.reader.TurnStatus;
 import com.glong.reader.cache.Cache;
 import com.glong.reader.cache.DiskCache;
@@ -29,6 +30,7 @@ import java.util.concurrent.Executors;
  */
 public class ReaderView extends View {
     private static final String TAG = "ReaderView";
+    private static final boolean DEBUG = true;
 
     protected Canvas mCurrPageCanvas;
     protected Canvas mNextPageCanvas;
@@ -73,15 +75,13 @@ public class ReaderView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int height = ReaderUtils.measureSize(1000, heightMeasureSpec);
-        int width = ReaderUtils.measureSize(600, widthMeasureSpec);
+//        int height = ReaderUtils.measureSize(1000, heightMeasureSpec);
+//        int width = ReaderUtils.measureSize(600, widthMeasureSpec);
+        int width = getMeasuredWidth();
+        int height = getMeasuredHeight();
         setMeasuredDimension(width, height);
 
         initEffectConfiguration();
-
-        if (mReaderManager != null) {
-            mReaderManager.onAreaChanged(width, height);
-        }
 
         if (mCurrPageBitmap == null && mNextPageBitmap == null) {
             mCurrPageBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444);
@@ -89,7 +89,13 @@ public class ReaderView extends View {
 
             mCurrPageCanvas = new Canvas(mCurrPageBitmap);
             mNextPageCanvas = new Canvas(mNextPageBitmap);
-            mReaderManager.drawPage(mCurrPageCanvas);
+        }
+
+        if (mReaderManager != null) {
+            mReaderManager.onAreaChanged(width, height);
+            if (mCurrPageCanvas != null) {
+                mReaderManager.drawPage(mCurrPageCanvas);
+            }
         }
     }
 
@@ -260,12 +266,18 @@ public class ReaderView extends View {
     public static abstract class ReaderManager implements IReaderManager {
         private static final String TAG = "ReaderView#ReaderManage";
 
+        private TurnStatus mLastTurnStatus = TurnStatus.IDLE;
         ReaderView mReaderView;
         Cache mCache;
         ReaderResolve mReaderResolve = new ReaderResolve();
 
         private OnReaderWatcherListener mOnReaderWatcherListener;
         private ExecutorService mFixedThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+        /**
+         * <Integer,Boolean>键值对，Boolean 为true表示下载并且下载完成后需要展示
+         */
+        private ReaderSparseBooleanArray mDownloadingQueue = new ReaderSparseBooleanArray();
 
         public ReaderManager() {
         }
@@ -290,7 +302,7 @@ public class ReaderView extends View {
                 if (mOnReaderWatcherListener != null) {
                     mOnReaderWatcherListener.onPageChanged(mReaderResolve.getPageIndex());
                 }
-                return TurnStatus.LOAD_SUCCESS;
+                return result(TurnStatus.LOAD_SUCCESS);
             }
             return toPrevChapter();
         }
@@ -304,7 +316,7 @@ public class ReaderView extends View {
                 if (mOnReaderWatcherListener != null) {
                     mOnReaderWatcherListener.onPageChanged(mReaderResolve.getPageIndex());
                 }
-                return TurnStatus.LOAD_SUCCESS;
+                return result(TurnStatus.LOAD_SUCCESS);
             }
             return toNextChapter();
         }
@@ -313,7 +325,7 @@ public class ReaderView extends View {
         public final TurnStatus toPrevChapter() {
             int chapterIndex = mReaderResolve.getChapterIndex();
             if (chapterIndex == 0) {
-                return TurnStatus.NO_PREV_CHAPTER;
+                return result(TurnStatus.NO_PREV_CHAPTER);
             }
             return toSpecifiedChapter(chapterIndex - 1, ReaderResolve.LAST_INDEX);
         }
@@ -322,7 +334,7 @@ public class ReaderView extends View {
         public final TurnStatus toNextChapter() {
             int chapterIndex = mReaderResolve.getChapterIndex();
             if (chapterIndex >= mReaderResolve.getChapterSum() - 1) {
-                return TurnStatus.NO_NEXT_CHAPTER;
+                return result(TurnStatus.NO_NEXT_CHAPTER);
             }
             return toSpecifiedChapter(chapterIndex + 1, ReaderResolve.FIRST_INDEX);
         }
@@ -332,35 +344,30 @@ public class ReaderView extends View {
             checkAdapterNonNull();
             final Adapter adapter = mReaderView.getAdapter();
             if (adapter.getChapterCount() == 0) {
-                return TurnStatus.LOAD_FAILURE;
+                return result(TurnStatus.LOAD_FAILURE);
             }
+            if (this.mDownloadingQueue.contains(chapterIndex)) {
+                if (DEBUG)
+                    Toast.makeText(mReaderView.getContext(), "正在下载", Toast.LENGTH_SHORT).show();
+                mDownloadingQueue.put(chapterIndex, true);// 正在下载的可能是缓存在下载，所以这里必须设置为true
+                return result(TurnStatus.DOWNLOADING);
+            }
+
             final Object chapterItem = adapter.getChapterList().get(chapterIndex);
-            this.mReaderResolve.setTitle(adapter.obtainChapterName(chapterItem));
-
             Object cache = mCache.get(adapter.obtainCacheKey(chapterItem), adapter.castSecondGeneric());
+
             if (cache == null) {
-                mFixedThreadPool.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.d(ReaderManager.TAG, " start download chapterIndex:" + chapterIndex);
-                        Object downLoad = adapter.downLoad(chapterItem);
-
-                        if (downLoad != null) {
-                            Log.d(ReaderManager.TAG, "download " + chapterIndex
-                                    + " success,content:" + adapter.obtainChapterContent(downLoad));
-
-                            setUpReaderResolve(chapterIndex, charIndex, adapter.obtainChapterContent(downLoad));
-
-                            // 保存至缓存
-                            mCache.put(adapter.obtainCacheKey(chapterItem), downLoad);
-                        }
-                    }
-                });
-                return TurnStatus.DOWNLOADING;
+                this.download(adapter, chapterItem, chapterIndex, charIndex, true);
+                return result(TurnStatus.DOWNLOADING);
             } else {
-                setUpReaderResolve(chapterIndex, charIndex, adapter.obtainChapterContent(cache));
-                return TurnStatus.LOAD_SUCCESS;
+                setUpReaderResolve(chapterIndex, charIndex, adapter.obtainChapterName(chapterItem), adapter.obtainChapterContent(cache));
+                return result(TurnStatus.LOAD_SUCCESS);
             }
+        }
+
+        private TurnStatus result(TurnStatus turnStatus) {
+            mLastTurnStatus = turnStatus;
+            return turnStatus;
         }
 
         @Override
@@ -382,10 +389,18 @@ public class ReaderView extends View {
         }
 
         @Override
-        public void drawPage(Canvas canvas) {
+        public void drawPage(@NonNull Canvas canvas) {
             mReaderResolve.drawPage(canvas);
         }
 
+        /**
+         * 返回缓存，如果没有通过{@link this#setCache(Cache)}设置缓存，则返回默认的缓存
+         * <p>
+         * 注意：如果没有通过{@link this#setCache(Cache)}设置缓存并且在调用
+         * {@link ReaderView#setReaderManager(ReaderManager)}之前调用该方法返回null
+         *
+         * @return 缓存
+         */
         public Cache getCache() {
             return mCache;
         }
@@ -401,17 +416,127 @@ public class ReaderView extends View {
         public void setReaderResolve(ReaderResolve readerResolve) {
             mReaderResolve = readerResolve;
             mReaderResolve.calculateChapterParameter();
+            this.mReaderView.invalidateCurrPage();
         }
 
-        private void setUpReaderResolve(int chapterIndex, int charIndex, String content) {
+        private void setUpReaderResolve(int chapterIndex, int charIndex, String title, String content) {
             mReaderResolve.setChapterIndex(chapterIndex);
             mReaderResolve.setCharIndex(charIndex);
+            mReaderResolve.setTitle(title);
             mReaderResolve.setContent(content);
 
             if (mOnReaderWatcherListener != null) {
                 mOnReaderWatcherListener.onChapterChanged(chapterIndex, mReaderResolve.getPageIndex());
             }
+            //章节发生变化后，缓存前后章节（如果没有缓存的话）
+            cacheNearChapter(chapterIndex);
+
             mReaderView.invalidateCurrPage();
+        }
+
+        /**
+         * 缓存指定章节 前后章节（前后章节的数量通过{@link Cache#setCacheAmount(int)}设置，默认值为3）
+         *
+         * @param chapterIndex 指定章节
+         */
+        private void cacheNearChapter(int chapterIndex) {
+            int cacheAmount = mCache.getCacheAmount();
+            final Adapter adapter = this.mReaderView.getAdapter();
+
+            for (int i = chapterIndex - cacheAmount; i <= chapterIndex + cacheAmount; i++) {
+                //如果i合法
+                if (i >= 0 && i < adapter.getChapterCount()) {
+                    final Object chapterItem = adapter.getChapterList().get(i);
+                    // 还没有缓存，则开始下载
+                    if (!mCache.isCached(adapter.obtainCacheKey(chapterItem))) {
+                        final int downloadChapterIndex = i;
+                        ReaderManager.this.download(adapter, chapterItem, downloadChapterIndex, ReaderResolve.UNKOWN, false);
+                    }
+                }
+            }
+        }
+
+        /**
+         * 下载 or 下载并且展示
+         *
+         * @param adapter           {@link Adapter}
+         * @param chapterItem       one item of {@link Adapter#getChapterList()}
+         * @param chapterIndex      章节索引
+         * @param charIndex         字符索引
+         * @param showAfterDownload 下载完成后是否展示
+         */
+        private void download(final Adapter adapter, final Object chapterItem
+                , final int chapterIndex, final int charIndex, final boolean showAfterDownload) {
+            mFixedThreadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d(ReaderManager.TAG, " start download chapterIndex:" + chapterIndex);
+                    if (showAfterDownload)
+                        ReaderManager.this.toastInAsync("开始下载");
+
+                    if (showAfterDownload && mOnReaderWatcherListener != null)
+                        mOnReaderWatcherListener.onChapterDownloadStart(chapterIndex);
+
+                    ReaderManager.this.mDownloadingQueue.put(chapterIndex, showAfterDownload);
+                    Object downLoad = adapter.downLoad(chapterItem);
+
+                    if (downLoad != null) {
+                        Log.d(ReaderManager.TAG, "download " + chapterIndex
+                                + " success,content:" + adapter.obtainChapterContent(downLoad));
+
+                        if (mDownloadingQueue.get(chapterIndex)) {
+                            ReaderManager.this.toastInAsync("下载成功");
+
+                            if (mOnReaderWatcherListener != null)
+                                mOnReaderWatcherListener.onChapterDownloadSuccess(chapterIndex);
+
+                            if (mLastTurnStatus != TurnStatus.LOAD_SUCCESS) {
+                                // 当字符索引未知时，需要计算一下
+                                int tempCharIndex = charIndex;
+                                if (tempCharIndex == ReaderResolve.UNKOWN) {
+                                    if (ReaderManager.this.mReaderResolve.getChapterIndex() < chapterIndex) {
+                                        tempCharIndex = ReaderResolve.FIRST_INDEX;
+                                    } else {
+                                        tempCharIndex = ReaderResolve.LAST_INDEX;
+                                    }
+                                }
+                                setUpReaderResolve(chapterIndex, tempCharIndex, adapter.obtainChapterName(chapterItem), adapter.obtainChapterContent(downLoad));
+                            }
+                        }
+                        // 保存至缓存
+                        mCache.put(adapter.obtainCacheKey(chapterItem), downLoad);
+                    } else {
+                        // 章节下载失败
+                        if (showAfterDownload && mOnReaderWatcherListener != null)
+                            mOnReaderWatcherListener.onChapterDownloadError(chapterIndex);
+                    }
+                    ReaderManager.this.mDownloadingQueue.delete(chapterIndex);
+                }
+            });
+        }
+
+        public void onAdapterChanged(Adapter oldAdapter, Adapter adapter) {
+        }
+
+        public TurnStatus onChanged() {
+            Adapter adapter = ReaderManager.this.mReaderView.getAdapter();
+//            ReaderManager.this.mReaderResolve.setArea(ReaderManager.this.mReaderView.getMeasuredWidth(),
+//                    ReaderManager.this.mReaderView.getMeasuredHeight());
+            ReaderManager.this.mReaderResolve.setChapterSum(adapter.getChapterCount());
+
+            int chapterIndex = 0;
+            if (ReaderManager.this.mReaderResolve.getChapterIndex() <= adapter.getChapterCount()) {
+                chapterIndex = ReaderManager.this.mReaderResolve.getChapterIndex();
+            }
+            return ReaderManager.this.toSpecifiedChapter(chapterIndex, 0);
+        }
+
+        public OnReaderWatcherListener getOnReaderWatcherListener() {
+            return mOnReaderWatcherListener;
+        }
+
+        public void setOnReaderWatcherListener(OnReaderWatcherListener onReaderWatcherListener) {
+            mOnReaderWatcherListener = onReaderWatcherListener;
         }
 
         private void checkAdapterNonNull() {
@@ -421,21 +546,17 @@ public class ReaderView extends View {
             }
         }
 
-        public void onAdapterChanged(Adapter oldAdapter, Adapter adapter) {
+        private void toastInAsync(final String msg) {
+            if (DEBUG)
+                ReaderManager.this.mReaderView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(mReaderView.getContext(), msg, Toast.LENGTH_SHORT).show();
+                    }
+                });
+
         }
 
-        public TurnStatus onChanged() {
-            Adapter adapter = ReaderManager.this.mReaderView.getAdapter();
-            ReaderManager.this.mReaderResolve.setArea(ReaderManager.this.mReaderView.getMeasuredWidth(),
-                    ReaderManager.this.mReaderView.getMeasuredHeight());
-            ReaderManager.this.mReaderResolve.setChapterSum(adapter.getChapterCount());
-
-            int chapterIndex = 0;
-            if (ReaderManager.this.mReaderResolve.getChapterIndex() <= adapter.getChapterCount()) {
-                chapterIndex = ReaderManager.this.mReaderResolve.getChapterIndex();
-            }
-            return ReaderManager.this.toSpecifiedChapter(chapterIndex, ReaderManager.this.mReaderResolve.getCharIndex());
-        }
     }
 
     static class AdapterDataObservable extends Observable<DataObserver> {

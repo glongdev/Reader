@@ -26,6 +26,22 @@ public enum TurnStatus {
      */
     DOWNLOADING,
 
+    /**
+     * 没有下一章
+     */
+    NO_NEXT_CHAPTER,
+
+    /**
+     * 没有上一章
+     */
+    NO_PREV_CHAPTER
+
+//    /**
+//     * 等待中，代表上次的下载还未完成
+//     * 这个时候不处理翻页请求
+//     */
+//    LOADING,
+
 //    /**
 //     * 没有下一页
 //     */
@@ -36,13 +52,4 @@ public enum TurnStatus {
 //     */
 //    NO_PREV_PAGE,
 
-    /**
-     * 没有下一章
-     */
-    NO_NEXT_CHAPTER,
-
-    /**
-     * 没有上一章
-     */
-    NO_PREV_CHAPTER
 }

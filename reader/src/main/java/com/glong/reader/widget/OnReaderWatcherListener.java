@@ -21,4 +21,28 @@ public interface OnReaderWatcherListener {
      * @param pageIndex    跳转到了这章的第pageIndex页（从第0页开始）
      */
     void onChapterChanged(int chapterIndex, int pageIndex);
+
+    /**
+     * 开始下载当前所需章节时调用（方便弹出提示等等）
+     * 当下载缓存时不会回调
+     *
+     * @param chapterIndex 章节索引
+     */
+    void onChapterDownloadStart(int chapterIndex);
+
+    /**
+     * 当前所需章节下载成功后回调
+     * 仅下载缓存时不会回调
+     *
+     * @param chapterIndex 章节索引
+     */
+    void onChapterDownloadSuccess(int chapterIndex);
+
+    /**
+     * 当前所需章节下载成功后回调
+     * 仅下载缓存时不会回调
+     *
+     * @param chapterIndex 章节索引
+     */
+    void onChapterDownloadError(int chapterIndex);
 }

@@ -1,5 +1,7 @@
 package com.glong.reader.cache;
 
+import android.support.annotation.NonNull;
+
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -12,7 +14,7 @@ public class DiskCache extends Cache {
 
     private Gson mGson;
 
-    public DiskCache(File cacheDir) {
+    public DiskCache(@NonNull File cacheDir) {
         super(cacheDir);
         mGson = new Gson();
     }
@@ -36,5 +38,26 @@ public class DiskCache extends Cache {
     public <T> T get(String key, Class<T> clazz) {
         String cache = ACache.get(getCacheDir()).getAsString(key);
         return mGson.fromJson(cache, clazz);
+    }
+
+    @Override
+    public boolean remove(String key) {
+        return ACache.get(getCacheDir()).remove(key);
+    }
+
+    @Override
+    public boolean removeAll() {
+        boolean result = true;
+        for (File childFile : getCacheDir().listFiles()) {
+            if (!childFile.delete()) {
+                result = false;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public boolean isCached(String key) {
+        return get(key) != null;
     }
 }
