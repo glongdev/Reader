@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 import android.widget.Scroller;
 
@@ -18,6 +19,7 @@ public abstract class Effect {
     protected PageChangedCallback mPageChangedCallback;
 
     protected Scroller mScroller;
+    protected VelocityTracker mVelocityTracker = VelocityTracker.obtain();
 
     protected int mLongClickTime;
     protected int mTouchSlop;
@@ -61,5 +63,11 @@ public abstract class Effect {
      * 承接View的computeScroll()
      */
     public void computeScroll() {
+    }
+
+    public void abortAnimation() {
+        if (!mScroller.isFinished()) {
+            mScroller.abortAnimation();
+        }
     }
 }

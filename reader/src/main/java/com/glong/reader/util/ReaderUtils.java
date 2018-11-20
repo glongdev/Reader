@@ -1,4 +1,4 @@
-package com.glong.reader;
+package com.glong.reader.util;
 
 import android.view.View;
 

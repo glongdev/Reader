@@ -10,11 +10,11 @@ import com.glong.reader.TurnStatus;
  * Created by Garrett on 2018/11/18.
  * contact me krouky@outlook.com
  */
-public class EffectOfNo extends Effect {
+public class EffectOfNon extends Effect {
 
     private float mDownX;
 
-    public EffectOfNo(Context context) {
+    public EffectOfNon(Context context) {
         super(context);
     }
 

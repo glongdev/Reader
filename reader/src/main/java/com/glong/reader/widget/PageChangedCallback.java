@@ -6,7 +6,7 @@ import com.glong.reader.TurnStatus;
  * Created by Garrett on 2018/11/18.
  * contact me krouky@outlook.com
  */
-interface PageChangedCallback {
+public interface PageChangedCallback {
 
     /**
      * 刷新ReaderView时调用

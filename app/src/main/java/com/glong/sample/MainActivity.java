@@ -7,6 +7,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.glong.reader.widget.EffectOfCover;
+import com.glong.reader.widget.PageChangedCallback;
 import com.glong.reader.widget.ReaderView;
 import com.glong.sample.entry.ChapterContentBean;
 import com.glong.sample.entry.ChapterItemBean;
@@ -18,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ReaderView.Adapter<ChapterItemBean, ChapterContentBean> mAdapter;
     private ReaderView.ReaderManager mReaderManager;
+    private ReaderView mReaderView;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -40,23 +43,28 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        initViews();
         initReader();
         initData();
+        initViews();
     }
 
     private void initViews() {
+        final PageChangedCallback pageChangedCallback = mReaderView.getPageChangedCallback();
         findViewById(R.id.prev_chapter_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mReaderManager.toPrevChapter();
+//                mReaderManager.toPrevChapter();
+                pageChangedCallback.drawCurrPage();
+                pageChangedCallback.invalidate();
             }
         });
 
         findViewById(R.id.next_chapter_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mReaderManager.toNextChapter();
+//                mReaderManager.toNextChapter();
+                pageChangedCallback.drawNextPage();
+                pageChangedCallback.invalidate();
             }
         });
     }
@@ -74,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initReader() {
-        final ReaderView readerView = findViewById(R.id.reader_view);
+        mReaderView = findViewById(R.id.reader_view);
 
         mReaderManager = new ReaderView.ReaderManager() {
             @Override
@@ -83,7 +91,8 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        readerView.setReaderManager(mReaderManager);
+        mReaderView.setReaderManager(mReaderManager);
+        mReaderView.setEffect(new EffectOfCover(this));
 
         mAdapter = new ReaderView.Adapter<ChapterItemBean, ChapterContentBean>() {
             @Override
@@ -119,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public ChapterContentBean downLoad(ChapterItemBean chapterItemBean) {
                 try {
-                    Thread.sleep(10000);
+                    Thread.sleep(1000);
                     ChapterContentBean chapterContentBean = new ChapterContentBean();
                     chapterContentBean.setChapterId(chapterItemBean.getChapterId());
                     chapterContentBean.setChapterName(chapterItemBean.getChapterName());
@@ -132,6 +141,6 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        readerView.setAdapter(mAdapter);
+        mReaderView.setAdapter(mAdapter);
     }
 }

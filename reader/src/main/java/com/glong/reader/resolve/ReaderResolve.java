@@ -10,12 +10,12 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.glong.reader.config.ReaderConfig;
 import com.glong.reader.textconvert.ShowChar;
 import com.glong.reader.textconvert.ShowLine;
 import com.glong.reader.textconvert.TextUtils;
+import com.glong.reader.util.Log;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -29,8 +29,6 @@ import java.util.Locale;
  */
 public class ReaderResolve {
     private static final String TAG = ReaderResolve.class.getSimpleName();
-
-    private boolean mInitialized = false;
 
     public static final int LAST_INDEX = -1;//表示最后一个
     public static final int FIRST_INDEX = 0;//表示第一个

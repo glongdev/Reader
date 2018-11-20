@@ -7,7 +7,6 @@ import android.graphics.Canvas;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -18,6 +17,7 @@ import com.glong.reader.cache.Cache;
 import com.glong.reader.cache.DiskCache;
 import com.glong.reader.config.ReaderConfig;
 import com.glong.reader.resolve.ReaderResolve;
+import com.glong.reader.util.Log;
 
 import java.io.File;
 import java.util.List;
@@ -30,7 +30,6 @@ import java.util.concurrent.Executors;
  */
 public class ReaderView extends View {
     private static final String TAG = "ReaderView";
-    private static final boolean DEBUG = true;
 
     protected Canvas mCurrPageCanvas;
     protected Canvas mNextPageCanvas;
@@ -66,7 +65,7 @@ public class ReaderView extends View {
 
     public ReaderView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mEffect = new EffectOfNo(context);
+        mEffect = new EffectOfNon(context);
         mReaderConfig = new ReaderConfig.Builder().build();
         mPageChangedCallback = new SimplePageChangedCallback();
         mObserver = new AdapterDataObserver();
@@ -82,7 +81,6 @@ public class ReaderView extends View {
         setMeasuredDimension(width, height);
 
         initEffectConfiguration();
-
         if (mCurrPageBitmap == null && mNextPageBitmap == null) {
             mCurrPageBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444);
             mNextPageBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444);
@@ -347,7 +345,7 @@ public class ReaderView extends View {
                 return result(TurnStatus.LOAD_FAILURE);
             }
             if (this.mDownloadingQueue.contains(chapterIndex)) {
-                if (DEBUG)
+                if (Log.DEBUG)
                     Toast.makeText(mReaderView.getContext(), "正在下载", Toast.LENGTH_SHORT).show();
                 mDownloadingQueue.put(chapterIndex, true);// 正在下载的可能是缓存在下载，所以这里必须设置为true
                 return result(TurnStatus.DOWNLOADING);
@@ -430,8 +428,7 @@ public class ReaderView extends View {
             }
             //章节发生变化后，缓存前后章节（如果没有缓存的话）
             cacheNearChapter(chapterIndex);
-
-            mReaderView.invalidateCurrPage();
+//            mReaderView.invalidateCurrPage();
         }
 
         /**
@@ -501,6 +498,11 @@ public class ReaderView extends View {
                                     }
                                 }
                                 setUpReaderResolve(chapterIndex, tempCharIndex, adapter.obtainChapterName(chapterItem), adapter.obtainChapterContent(downLoad));
+                                if (showAfterDownload) {
+//                                    if (mReaderResolve.getChapterIndex() == chapterIndex)
+                                    ReaderManager.this.mReaderView.invalidateBothPage();
+//                                    else
+                                }
                             }
                         }
                         // 保存至缓存
@@ -547,7 +549,7 @@ public class ReaderView extends View {
         }
 
         private void toastInAsync(final String msg) {
-            if (DEBUG)
+            if (Log.DEBUG)
                 ReaderManager.this.mReaderView.post(new Runnable() {
                     @Override
                     public void run() {
