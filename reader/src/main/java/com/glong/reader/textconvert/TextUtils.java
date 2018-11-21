@@ -3,16 +3,22 @@ package com.glong.reader.textconvert;
 import android.graphics.Paint;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 测量工具
  */
 public class TextUtils {
 
-    public static final String WRAP_MARK = "<br><br>";
-    public static final String WRAP_MARK1 = "<br>";
-    public static final String WRAP_MARK2 = "</p>";
+    public static Set<String> sParagraph = new HashSet<>();
+
+    static {
+        sParagraph.add("<br><br>");
+        sParagraph.add("<br>");
+        sParagraph.add("</p>");
+    }
 
     /**
      * 截取一行的Char
@@ -39,41 +45,23 @@ public class TextUtils {
             String measureStr = String.valueOf(cs[i]);
             float charWidth = paint.measureText(measureStr);
 
-            //测出校验是否是<br><br> 是则换行
-            if (cs.length - i >= WRAP_MARK.length()) {
-                if ("<".equals(String.valueOf(cs[i])) && "b".equals(String.valueOf(cs[i + 1]))
-                        && "r".equals(String.valueOf(cs[i + 2])) && ">".equals(String.valueOf(cs[i + 3]))
-                        && "<".equals(String.valueOf(cs[i + 4])) && "b".equals(String.valueOf(cs[i + 5]))
-                        && "r".equals(String.valueOf(cs[i + 6])) && ">".equals(String.valueOf(cs[i + 7]))) {
-                    breakResult.chartNums = i + 8;
-                    breakResult.isFullLine = true;
-                    breakResult.endWithWrapMark = true;
-
-                    return breakResult;
-                }
-            }
-
-            //测出校验是否是<br> 是则换行
-            if (cs.length - i >= WRAP_MARK1.length()) {
-                if ("<".equals(String.valueOf(cs[i])) && "b".equals(String.valueOf(cs[i + 1]))
-                        && "r".equals(String.valueOf(cs[i + 2])) && ">".equals(String.valueOf(cs[i + 3]))) {
-                    breakResult.chartNums = i + 4;
-                    breakResult.isFullLine = true;
-                    breakResult.endWithWrapMark = true;
-
-                    return breakResult;
-                }
-            }
-
-            //测出校验是否是</p> 是则换行
-            if (cs.length - i >= WRAP_MARK2.length()) {
-                if ("<".equals(String.valueOf(cs[i])) && "/".equals(String.valueOf(cs[i + 1]))
-                        && "p".equals(String.valueOf(cs[i + 2])) && ">".equals(String.valueOf(cs[i + 3]))) {
-                    breakResult.chartNums = i + 4;
-                    breakResult.isFullLine = true;
-                    breakResult.endWithWrapMark = true;
-
-                    return breakResult;
+            for (String paragraph : sParagraph) {
+                if (paragraph != null && paragraph.length() > 0 && size - i >= paragraph.length()) {
+                    char[] paragraphArray = paragraph.toCharArray();
+                    int length = paragraphArray.length;
+                    boolean isLineFeed = true;
+                    for (int j = 0; j < length; j++) {
+                        if (paragraphArray[j] != cs[i + j]) {
+                            isLineFeed = false;
+                            break;
+                        }
+                    }
+                    if (isLineFeed) {
+                        breakResult.chartNums = i + length;
+                        breakResult.isFullLine = true;
+                        breakResult.endWithWrapMark = true;
+                        return breakResult;
+                    }
                 }
             }
 
@@ -119,32 +107,23 @@ public class TextUtils {
     /**
      * 截取字符串
      *
-     * @param src 源字符串
-     * @param measureWidth 
-     * @param textPadding
-     * @param paint
+     * @param src          源字符串
+     * @param measureWidth 文字展示长度
+     * @param textPadding  文字padding
+     * @param paint        Paint
      * @return
      */
     public static List<ShowLine> breakToLineList(String src, float measureWidth, float textPadding, Paint paint) {
         String textData = src;
-        if (src.startsWith("<br>")) {
-            textData = src.substring(4);
-        } else if (src.startsWith("</p>")) {
-            textData = src.substring(4);
-        }
         List<ShowLine> showLines = new ArrayList<>();
 
         while (textData.length() > 0) {
             BreakResult breakResult = breakText(textData, measureWidth, textPadding, paint);
-//            if (breakResult != null && breakResult.hasData()) {
             ShowLine showLine = new ShowLine();
             showLine.charsData = breakResult.showChars;
             if (showLine.getLineFirstIndexInChapter() != -1) {
                 showLines.add(showLine);
             }
-//            } else {
-//                break;
-//            }
             textData = textData.substring(breakResult.chartNums);
         }
 

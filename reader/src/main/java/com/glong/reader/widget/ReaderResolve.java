@@ -1,4 +1,4 @@
-package com.glong.reader.resolve;
+package com.glong.reader.widget;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -12,6 +12,7 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.glong.reader.config.ColorsConfig;
 import com.glong.reader.config.ReaderConfig;
 import com.glong.reader.textconvert.ShowChar;
 import com.glong.reader.textconvert.ShowLine;
@@ -99,16 +100,16 @@ public class ReaderResolve {
     }
 
     private void initPaints() {
-        mMainBodyPaint.setColor(mReaderConfig.getReaderBackground().getTextColor());
+        mMainBodyPaint.setColor(mReaderConfig.getColorsConfig().getTextColor());
         mMainBodyPaint.setTextSize(mReaderConfig.getTextSize());
 
         mChapterPaint.setTextSize(mReaderConfig.getTextSize() * 1.4f);
-        mChapterPaint.setColor(mReaderConfig.getReaderBackground().getTextColor());
+        mChapterPaint.setColor(mReaderConfig.getColorsConfig().getTextColor());
 
-        mMarginPaint.setColor(mReaderConfig.getReaderBackground().getTextColor());
+        mMarginPaint.setColor(mReaderConfig.getColorsConfig().getTextColor());
         mMarginPaint.setTextSize(40);
 
-        mBatteryPaint.setColor(mReaderConfig.getReaderBackground().getBatteryColor());
+        mBatteryPaint.setColor(mReaderConfig.getColorsConfig().getBatteryColor());
         mBatteryPaint.setStrokeWidth(2);
     }
 
@@ -215,7 +216,7 @@ public class ReaderResolve {
         //step1.清空画布
         canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
-        Drawable drawable = mReaderConfig.getReaderBackground().getBackground();
+        Drawable drawable = mReaderConfig.getColorsConfig().getBackground();
         if (drawable instanceof ColorDrawable) {
             int color = ((ColorDrawable) drawable).getColor();
             canvas.drawColor(color);
@@ -482,13 +483,34 @@ public class ReaderResolve {
         calculateChapterParameter();
     }
 
-    public ReaderConfig getReaderConfig() {
+    ReaderConfig getReaderConfig() {
         return mReaderConfig;
     }
 
-    public void setReaderConfig(@NonNull ReaderConfig readerConfig) {
+    void setReaderConfig(@NonNull ReaderConfig readerConfig) {
+        ReaderConfig oldReaderConfig = mReaderConfig;
         mReaderConfig = readerConfig;
-        initPaints();
+
+        int oldTextSize = oldReaderConfig.getTextSize();
+//        int[] oldBatteryWidthAndHeight = oldReaderConfig.getBatteryWidthAndHeight();
+        int oldLineSpace = oldReaderConfig.getLineSpace();
+        int[] oldPadding = oldReaderConfig.getPadding();
+        ColorsConfig oldColorsConfig = oldReaderConfig.getColorsConfig();
+
+        int newTextSize = readerConfig.getTextSize();
+//        int[] newBatteryWidthAndHeight = readerConfig.getBatteryWidthAndHeight();
+        int newLineSpace = readerConfig.getLineSpace();
+        int[] newPadding = readerConfig.getPadding();
+        ColorsConfig newColorsConfig = readerConfig.getColorsConfig();
+
+        if (oldTextSize != newTextSize || oldColorsConfig.getTextColor() != newColorsConfig.getTextColor()
+                || oldColorsConfig.getBatteryColor() != newColorsConfig.getBatteryColor()) {
+            initPaints();
+        }
+
+        if (oldTextSize != newTextSize || oldLineSpace != newLineSpace || oldPadding != newPadding) {
+            calculateChapterParameter();
+        }
     }
 
     public int getBattery() {

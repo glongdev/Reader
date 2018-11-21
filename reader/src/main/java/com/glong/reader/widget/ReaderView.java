@@ -16,8 +16,9 @@ import com.glong.reader.ReaderSparseBooleanArray;
 import com.glong.reader.TurnStatus;
 import com.glong.reader.cache.Cache;
 import com.glong.reader.cache.DiskCache;
+import com.glong.reader.config.ColorsConfig;
 import com.glong.reader.config.ReaderConfig;
-import com.glong.reader.resolve.ReaderResolve;
+import com.glong.reader.textconvert.TextUtils;
 import com.glong.reader.util.Log;
 
 import java.io.File;
@@ -174,17 +175,113 @@ public class ReaderView extends View {
 
     public void setReaderManager(@NonNull ReaderManager readerManager) {
         mReaderManager = readerManager;
-        mReaderManager.setReaderView(this);
+        mReaderManager.setReaderView(this, mReaderConfig);
     }
 
+    /**
+     * 设置布局配置（包括文字大小、颜色等等所有配置）
+     *
+     * @param readerConfig 配置对象
+     */
     public void setReaderConfig(@NonNull ReaderConfig readerConfig) {
         this.mReaderConfig = readerConfig;
+        if (mReaderManager != null) {
+            mReaderManager.setReaderConfig(mReaderConfig);
+        }
     }
 
+    /**
+     * @return 如果没设置会返回一个默认的ReaderConfig
+     */
     public ReaderConfig getReaderConfig() {
         return this.mReaderConfig;
     }
 
+    /**
+     * 设置正文文字大小
+     */
+    public void setTextSize(int textSize) {
+        if (textSize > 0) {
+            getReaderConfig().setTextSize(textSize);
+            setReaderConfig(mReaderConfig);
+        }
+    }
+
+    public int getTextSize() {
+        return mReaderConfig.getTextSize();
+    }
+
+    /**
+     * 设置正文行间距
+     */
+    public void setLineSpace(int lineSpace) {
+        if (lineSpace >= 0) {
+            getReaderConfig().setLineSpace(lineSpace);
+            setReaderConfig(mReaderConfig);
+        }
+    }
+
+    public int getLineSpace() {
+        return mReaderConfig.getLineSpace();
+    }
+
+    /**
+     * 设置正文距离四个边界的距离
+     *
+     * @param padding 边界
+     */
+    public void setBodyTextPadding(@NonNull int[] padding) {
+        if (padding.length != 4) {
+            throw new IllegalArgumentException("padding length must == 4");
+        }
+        getReaderConfig().setPadding(padding);
+        setReaderConfig(mReaderConfig);
+    }
+
+    public int[] getBodyTextPadding() {
+        return mReaderConfig.getPadding();
+    }
+
+    /**
+     * 设置电池的长和宽
+     *
+     * @param widthAndHeight 长：widthAndHeight[0] ,宽：widthAndHeight[1]
+     */
+    public void setBatteryWidthAndHeight(@NonNull int[] widthAndHeight) {
+        if (widthAndHeight.length != 2) {
+            throw new IllegalArgumentException("battery widthAndHeight length must == 2");
+        }
+        getReaderConfig().setBatteryWidthAndHeight(widthAndHeight);
+        setReaderConfig(mReaderConfig);
+    }
+
+    public int[] getBatteryWidthAndHeight() {
+        return mReaderConfig.getBatteryWidthAndHeight();
+    }
+
+    /**
+     * 设置所有颜色相关
+     * 因为颜色都是对应的，比如文字和背景，白色的背景往往对应黑色的文字
+     *
+     * @param colorsConfig 颜色相关对象
+     */
+    public void setColorsConfig(@NonNull ColorsConfig colorsConfig) {
+        if (colorsConfig.getBackground() == null) {
+            throw new NullPointerException("colorsConfig#mBackground is null!");
+        }
+        getReaderConfig().setColorsConfig(colorsConfig);
+        setReaderConfig(mReaderConfig);
+    }
+
+    public ColorsConfig getColorsConfig() {
+        return mReaderConfig.getColorsConfig();
+    }
+
+    /**
+     * 设置翻页动效
+     *
+     * @param effect 翻页动效
+     */
     public void setEffect(@NonNull Effect effect) {
         this.mEffect = effect;
         initEffectConfiguration();
@@ -198,8 +295,14 @@ public class ReaderView extends View {
         return mPageChangedCallback;
     }
 
+    /**
+     * 设置翻页回调
+     *
+     * @param pageChangedCallback 翻页回调
+     */
     public void setPageChangedCallback(@NonNull PageChangedCallback pageChangedCallback) {
         mPageChangedCallback = pageChangedCallback;
+        mEffect.setPageChangedCallback(pageChangedCallback);
     }
 
     /**
@@ -270,7 +373,7 @@ public class ReaderView extends View {
         private TurnStatus mLastTurnStatus = TurnStatus.IDLE;
         ReaderView mReaderView;
         Cache mCache;
-        ReaderResolve mReaderResolve = new ReaderResolve();
+        ReaderResolve mReaderResolve;
 
         private OnReaderWatcherListener mOnReaderWatcherListener;
         private ExecutorService mFixedThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -381,7 +484,8 @@ public class ReaderView extends View {
 
         }
 
-        void setReaderView(ReaderView readerView) {
+        void setReaderView(ReaderView readerView, @NonNull ReaderConfig readerConfig) {
+            mReaderResolve = new ReaderResolve(readerConfig);
             this.mReaderView = readerView;
             if (mCache == null) {
                 mCache = new DiskCache(readerView.getContext().getCacheDir());
@@ -426,6 +530,9 @@ public class ReaderView extends View {
             this.mReaderView.invalidateCurrPage();
         }
 
+        /**
+         * 更新ReaderResolve
+         */
         private void setUpReaderResolve(int chapterIndex, int charIndex, String title, String content) {
             mReaderResolve.setChapterIndex(chapterIndex);
             mReaderResolve.setCharIndex(charIndex);
@@ -565,7 +672,24 @@ public class ReaderView extends View {
                         Toast.makeText(mReaderView.getContext(), msg, Toast.LENGTH_SHORT).show();
                     }
                 });
+        }
 
+        /**
+         * 增加分段符号
+         *
+         * @param paragraph 分段符
+         */
+        public void addParagraph(String paragraph) {
+            TextUtils.sParagraph.add(paragraph);
+        }
+
+        /**
+         * 设置阅读器配置
+         *
+         * @param readerConfig 阅读器配置
+         */
+        void setReaderConfig(ReaderConfig readerConfig) {
+            mReaderResolve.setReaderConfig(readerConfig);
         }
 
     }

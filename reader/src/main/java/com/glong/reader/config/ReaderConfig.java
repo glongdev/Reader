@@ -34,7 +34,7 @@ public class ReaderConfig {
     /**
      * 阅读界面所有颜色相关
      */
-    private ColorsConfig mReaderBackground;
+    private ColorsConfig mColorsConfig;
 
     private ReaderConfig() {
     }
@@ -71,12 +71,12 @@ public class ReaderConfig {
         mLineSpace = lineSpace;
     }
 
-    public ColorsConfig getReaderBackground() {
-        return mReaderBackground;
+    public ColorsConfig getColorsConfig() {
+        return mColorsConfig;
     }
 
-    public void setReaderBackground(ColorsConfig readerBackground) {
-        mReaderBackground = readerBackground;
+    public void setColorsConfig(ColorsConfig colorsConfig) {
+        mColorsConfig = colorsConfig;
     }
 
     public static class Builder {
@@ -89,7 +89,7 @@ public class ReaderConfig {
 
         private int[] mBatteryWidthAndHeight = new int[]{60, 20};
 
-        private ColorsConfig mReaderBackground = new ColorsConfig(new ColorDrawable(Color.WHITE), Color.BLACK, Color.BLACK);
+        private ColorsConfig mColorsConfig = new ColorsConfig(new ColorDrawable(Color.WHITE), Color.BLACK, Color.BLACK);
 
         public Builder setTextSize(@Size int textSize) {
             this.mTextSize = textSize;
@@ -106,8 +106,8 @@ public class ReaderConfig {
             return this;
         }
 
-        public Builder setReaderBackground(ColorsConfig readerBackground) {
-            this.mReaderBackground = readerBackground;
+        public Builder setColorsConfig(ColorsConfig colorsConfig) {
+            this.mColorsConfig = colorsConfig;
             return this;
         }
 
@@ -123,7 +123,7 @@ public class ReaderConfig {
             readerConfig.mTextSize = this.mTextSize;
             readerConfig.mPadding = this.mPadding;
             readerConfig.mLineSpace = this.mLineSpace;
-            readerConfig.mReaderBackground = this.mReaderBackground;
+            readerConfig.mColorsConfig = this.mColorsConfig;
             readerConfig.mBatteryWidthAndHeight = this.mBatteryWidthAndHeight;
         }
 
