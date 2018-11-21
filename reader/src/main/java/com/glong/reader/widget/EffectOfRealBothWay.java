@@ -17,17 +17,13 @@ import com.glong.reader.TurnStatus;
 import com.glong.reader.util.Log;
 
 /**
+ * 双向仿真翻页
  * Created by Garrett on 2018/11/20.
  * contact me krouky@outlook.com
  */
-public class EffectOfReal extends Effect {
-    private static final String TAG = "EffectOfReal";
+public class EffectOfRealBothWay extends Effect {
+    private static final String TAG = "EffectOfRealBothWay";
     private static final int ANIM_DURATION = 1000;
-
-    /**
-     * 是否开启双向翻页
-     */
-    private boolean mTurnPagesInBothDirections = true;
 
     /**
      * 书页的对角线长度
@@ -108,7 +104,7 @@ public class EffectOfReal extends Effect {
 
 //    private int currBgColor;
 
-    public EffectOfReal(Context context) {
+    public EffectOfRealBothWay(Context context) {
         super(context);
         init();
     }
@@ -200,10 +196,6 @@ public class EffectOfReal extends Effect {
             mTouch.y = mEffectHeight;
         } else {
             mTouch.y = y;
-        }
-
-        if (!mTurnPagesInBothDirections) {
-            mTouch.y = mEffectHeight;
         }
     }
 
@@ -607,12 +599,6 @@ public class EffectOfReal extends Effect {
     private void calcCornerXY(float x, float y) {
         mCornerX = x <= mEffectWidth / 2 ? 0 : mEffectWidth;
         mCornerY = y <= mEffectHeight / 2 ? 0 : mEffectHeight;
-
-        if (!mTurnPagesInBothDirections) {
-            mCornerX = mEffectWidth;
-            mCornerY = mEffectHeight;
-        }
-
         mIsRTandLB = ((mCornerX == 0 && mCornerY == mEffectHeight) || (mCornerX == mEffectWidth && mCornerY == 0)) ? true : false;
     }
 
@@ -764,13 +750,5 @@ public class EffectOfReal extends Effect {
         }
         Log.d(TAG, "start anim:" + dx + "," + dy);
         mScroller.startScroll((int) mTouch.x, (int) mTouch.y, dx, dy, ANIM_DURATION);
-    }
-
-    public boolean isTurnPagesInBothDirections() {
-        return mTurnPagesInBothDirections;
-    }
-
-    public void setTurnPagesInBothDirections(boolean turnPagesInBothDirections) {
-        mTurnPagesInBothDirections = turnPagesInBothDirections;
     }
 }

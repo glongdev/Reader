@@ -7,8 +7,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.glong.reader.widget.Effect;
-import com.glong.reader.widget.EffectOfReal;
+import com.glong.reader.widget.EffectOfRealOneWay;
 import com.glong.reader.widget.ReaderView;
 import com.glong.sample.entry.ChapterContentBean;
 import com.glong.sample.entry.ChapterItemBean;
@@ -36,11 +35,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "删除缓存" + (removed ? "成功" : "失败"), Toast.LENGTH_SHORT).show();
                 break;
             case R.id.switch_effect_of_real:
-                Effect effect = mReaderView.getEffect();
-                if (effect instanceof EffectOfReal) {
-                    EffectOfReal effectOfReal = (EffectOfReal) effect;
-                    effectOfReal.setTurnPagesInBothDirections(!effectOfReal.isTurnPagesInBothDirections());
-                }
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -96,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
         mReaderView.setReaderManager(mReaderManager);
-        mReaderView.setEffect(new EffectOfReal(this));
+        mReaderView.setEffect(new EffectOfRealOneWay(this));
 
         mAdapter = new ReaderView.Adapter<ChapterItemBean, ChapterContentBean>() {
             @Override
