@@ -7,8 +7,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.glong.reader.widget.EffectOfCover;
-import com.glong.reader.widget.PageChangedCallback;
+import com.glong.reader.widget.Effect;
+import com.glong.reader.widget.EffectOfReal;
 import com.glong.reader.widget.ReaderView;
 import com.glong.sample.entry.ChapterContentBean;
 import com.glong.sample.entry.ChapterItemBean;
@@ -35,6 +35,13 @@ public class MainActivity extends AppCompatActivity {
                 boolean removed = mReaderManager.getCache().removeAll();
                 Toast.makeText(this, "删除缓存" + (removed ? "成功" : "失败"), Toast.LENGTH_SHORT).show();
                 break;
+            case R.id.switch_effect_of_real:
+                Effect effect = mReaderView.getEffect();
+                if (effect instanceof EffectOfReal) {
+                    EffectOfReal effectOfReal = (EffectOfReal) effect;
+                    effectOfReal.setTurnPagesInBothDirections(!effectOfReal.isTurnPagesInBothDirections());
+                }
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -49,22 +56,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        final PageChangedCallback pageChangedCallback = mReaderView.getPageChangedCallback();
         findViewById(R.id.prev_chapter_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                mReaderManager.toPrevChapter();
-                pageChangedCallback.drawCurrPage();
-                pageChangedCallback.invalidate();
+                mReaderManager.toPrevChapter();
+                mReaderView.invalidateBothPage();
             }
         });
 
         findViewById(R.id.next_chapter_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                mReaderManager.toNextChapter();
-                pageChangedCallback.drawNextPage();
-                pageChangedCallback.invalidate();
+                mReaderManager.toNextChapter();
+                mReaderView.invalidateBothPage();
             }
         });
     }
@@ -92,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
         mReaderView.setReaderManager(mReaderManager);
-        mReaderView.setEffect(new EffectOfCover(this));
+        mReaderView.setEffect(new EffectOfReal(this));
 
         mAdapter = new ReaderView.Adapter<ChapterItemBean, ChapterContentBean>() {
             @Override

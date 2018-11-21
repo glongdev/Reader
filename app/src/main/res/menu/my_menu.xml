@@ -3,8 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/switch_effect_of_real"
+        android:icon="@android:drawable/ic_dialog_map"
+        android:title="切换双向翻页"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/delete"
-        android:title="删除缓存"
         android:icon="@android:drawable/ic_menu_delete"
+        android:title="删除缓存"
         app:showAsAction="always" />
 </menu>
