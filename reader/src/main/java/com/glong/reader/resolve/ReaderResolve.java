@@ -198,11 +198,9 @@ public class ReaderResolve {
 
     public void drawPage(Canvas canvas) {
         Log.d(TAG, "start drawPage,title:" + mTitle + " ,content:" + mContent);
-//        if (!mInitialized) {
-//            Log.d(TAG, "No initialization calculation yet, bounce method!");
-//        }
+        drawBackground(canvas);
+        drawMarginArea(canvas);
         if (mTitle != null) {
-            drawMarginArea(canvas);
             maybeDrawChapterTitle(canvas);
         }
         if (mShowLines != null) {
@@ -211,11 +209,9 @@ public class ReaderResolve {
     }
 
     /**
-     * 画边缘区域内容，分为6步
-     *
-     * @param canvas 画布
+     * 画背景/清空画布
      */
-    private void drawMarginArea(Canvas canvas) {
+    protected void drawBackground(Canvas canvas) {
         //step1.清空画布
         canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
@@ -227,36 +223,72 @@ public class ReaderResolve {
             //画背景
         }
 
-        //step2.在边缘区域画章节名称
-//        Paint.FontMetrics fm = mChapterPaint.getFontMetrics();
-        canvas.drawText(mTitle, mReaderConfig.getPadding()[0], mReaderConfig.getPadding()[1], mMarginPaint);
+    }
+
+    /**
+     * 画边缘区域内容，分为5步
+     *
+     * @param canvas 画布
+     */
+    protected void drawMarginArea(Canvas canvas) {
+        //step1.在边缘区域画章节名称
+        drawMarginTitle(canvas, mTitle, mReaderConfig.getPadding()[0], mReaderConfig.getPadding()[1], mMarginPaint);
 
         //step3.在边缘区域画页码
         if (mPageSum != -1) {//mPageSum == -1 代表当前页的内容为空
             String pageNumber = String.valueOf((mPageIndex + 1) + "/" + mPageSum);
-            canvas.drawText(pageNumber, mAreaWidth - mReaderConfig.getPadding()[2] - mMarginPaint.measureText(pageNumber)
+            drawPagination(canvas, mPageIndex, mPageSum, mAreaWidth - mReaderConfig.getPadding()[2] - mMarginPaint.measureText(pageNumber)
                     , mReaderConfig.getPadding()[1], mMarginPaint);
         }
 
         Paint.FontMetrics fm = mMarginPaint.getFontMetrics();
         float baseLine2centerLine = (fm.descent - fm.ascent) / 2 - fm.descent;// 中轴线到基准线距离
 
-        //step5.在边缘区域画总百分比
+        //step4.在边缘区域画总百分比
         float percent = (float) mChapterIndex * 100 / mChapterSum + (float) (mPageIndex + 1) * 100f / mPageSum / mChapterSum;
         String percentStr = decimalFormat.format(percent) + "%";
         drawPercentage(canvas, percent, mAreaWidth - mReaderConfig.getPadding()[2] - mMarginPaint.measureText(percentStr),
                 mAreaHeight - mReaderConfig.getPadding()[3] / 2 + baseLine2centerLine, mMarginPaint);
 
-        //step6.在边缘区域画电池
+        //step5.在边缘区域画电池
         int left = mReaderConfig.getPadding()[0];
         int top = mAreaHeight - mReaderConfig.getPadding()[3] / 2 - mReaderConfig.getBatteryWidthAndHeight()[1] / 2;
         int right = left + mReaderConfig.getBatteryWidthAndHeight()[0];
         int bottom = top + mReaderConfig.getBatteryWidthAndHeight()[1];
         drawBattery(canvas, mBatteryPaint, mBattery, new Rect(left, top, right, bottom), new Rect(left + 2, top + 2, right - 2, bottom - 2));
 
-        //step4.在边缘区域画时间
+        //step6.在边缘区域画时间
         String time = dateFormat.format(new Date());
         drawTime(canvas, time, right + 20, mAreaHeight - mReaderConfig.getPadding()[3] / 2 + baseLine2centerLine, mMarginPaint);
+    }
+
+    /**
+     * 画边缘地区的标题
+     *
+     * @param canvas Canvas
+     * @param title  标题名称
+     * @param x      x
+     * @param y      baseline
+     * @param paint  Paint
+     */
+    protected void drawMarginTitle(Canvas canvas, @Nullable String title, int x, int y, Paint paint) {
+        if (title != null)
+            canvas.drawText(title, x, y, paint);
+    }
+
+    /**
+     * 画页码
+     *
+     * @param canvas    Canvas
+     * @param pageIndex page索引
+     * @param pageSum   总页书
+     * @param x         x
+     * @param y         baseline
+     * @param paint     Paint
+     */
+    protected void drawPagination(Canvas canvas, int pageIndex, int pageSum, float x, int y, Paint paint) {
+        String pageNumber = String.valueOf((pageIndex + 1) + "/" + pageSum);
+        canvas.drawText(pageNumber, x, y, paint);
     }
 
     /**
@@ -309,7 +341,7 @@ public class ReaderResolve {
      *
      * @param canvas 画布
      */
-    private void maybeDrawChapterTitle(Canvas canvas) {
+    protected void maybeDrawChapterTitle(Canvas canvas) {
         //如果时第0页需要画章节大标题
         if (mPageIndex == 0) {
             Paint.FontMetrics pfm = mChapterPaint.getFontMetrics();
@@ -369,7 +401,7 @@ public class ReaderResolve {
      *
      * @param canvas
      */
-    private void drawLineText(Canvas canvas, ShowLine showLine, float x, float y, float textHeight) {
+    protected void drawLineText(Canvas canvas, ShowLine showLine, float x, float y, float textHeight) {
         canvas.drawText(showLine.getLineData(), x, y, mMainBodyPaint);
         float rightPosition;
         float bottomPosition = y + mMainBodyPaint.getFontMetrics().descent;
@@ -457,5 +489,18 @@ public class ReaderResolve {
     public void setReaderConfig(@NonNull ReaderConfig readerConfig) {
         mReaderConfig = readerConfig;
         initPaints();
+    }
+
+    public int getBattery() {
+        return mBattery;
+    }
+
+    /**
+     * 设置电量
+     *
+     * @param battery 电量 0 -- 100之间
+     */
+    public void setBattery(int battery) {
+        mBattery = battery;
     }
 }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Observable;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.os.BatteryManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -23,6 +24,8 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static android.content.Context.BATTERY_SERVICE;
 
 /**
  * Created by Garrett on 2018/11/17.
@@ -388,6 +391,12 @@ public class ReaderView extends View {
 
         @Override
         public void drawPage(@NonNull Canvas canvas) {
+            BatteryManager batteryManager = (BatteryManager) mReaderView.getContext().getSystemService(BATTERY_SERVICE);
+            if (batteryManager != null) {
+                int battery = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+                Log.d(TAG, "battery:" + battery);
+                mReaderResolve.setBattery(battery);
+            }
             mReaderResolve.drawPage(canvas);
         }
 
