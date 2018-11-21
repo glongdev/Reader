@@ -2,6 +2,7 @@ package com.glong.reader.config;
 
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.support.annotation.NonNull;
 import android.support.annotation.Size;
 
 /**
@@ -10,13 +11,30 @@ import android.support.annotation.Size;
  */
 public class ReaderConfig {
 
+    /**
+     * 正文文字大小
+     */
     private int mTextSize;
 
+    /**
+     * 正文的边界
+     */
     private int[] mPadding;
 
+    /**
+     * 电池宽度和高度
+     */
+    private int[] mBatteryWidthAndHeight;
+
+    /**
+     * 正文行间距
+     */
     private int mLineSpace;
 
-    private ReaderBackground mReaderBackground;
+    /**
+     * 阅读界面所有颜色相关
+     */
+    private ColorsConfig mReaderBackground;
 
     private ReaderConfig() {
     }
@@ -37,6 +55,14 @@ public class ReaderConfig {
         mPadding = padding;
     }
 
+    public int[] getBatteryWidthAndHeight() {
+        return mBatteryWidthAndHeight;
+    }
+
+    public void setBatteryWidthAndHeight(int[] batteryWidthAndHeight) {
+        mBatteryWidthAndHeight = batteryWidthAndHeight;
+    }
+
     public int getLineSpace() {
         return mLineSpace;
     }
@@ -45,11 +71,11 @@ public class ReaderConfig {
         mLineSpace = lineSpace;
     }
 
-    public ReaderBackground getReaderBackground() {
+    public ColorsConfig getReaderBackground() {
         return mReaderBackground;
     }
 
-    public void setReaderBackground(ReaderBackground readerBackground) {
+    public void setReaderBackground(ColorsConfig readerBackground) {
         mReaderBackground = readerBackground;
     }
 
@@ -57,11 +83,13 @@ public class ReaderConfig {
 
         private int mTextSize = 60;
 
-        private int[] mPadding = {40, 80, 40, 80};
+        private int[] mPadding = {40, 70, 40, 60};
 
-        private int mLineSpace = 50;
+        private int mLineSpace = 10;
 
-        private ReaderBackground mReaderBackground = new ReaderBackground(new ColorDrawable(Color.WHITE), Color.BLACK);
+        private int[] mBatteryWidthAndHeight = new int[]{60, 20};
+
+        private ColorsConfig mReaderBackground = new ColorsConfig(new ColorDrawable(Color.WHITE), Color.BLACK, Color.BLACK);
 
         public Builder setTextSize(@Size int textSize) {
             this.mTextSize = textSize;
@@ -78,8 +106,16 @@ public class ReaderConfig {
             return this;
         }
 
-        public Builder setReaderBackground(ReaderBackground readerBackground) {
+        public Builder setReaderBackground(ColorsConfig readerBackground) {
             this.mReaderBackground = readerBackground;
+            return this;
+        }
+
+        public Builder setBatteryWidthAndHeight(@NonNull int[] widthAndHeight) {
+            if (widthAndHeight.length < 2) {
+                throw new IllegalArgumentException("int[] widthAndHeight length must == 2");
+            }
+            this.mBatteryWidthAndHeight = widthAndHeight;
             return this;
         }
 
@@ -88,6 +124,7 @@ public class ReaderConfig {
             readerConfig.mPadding = this.mPadding;
             readerConfig.mLineSpace = this.mLineSpace;
             readerConfig.mReaderBackground = this.mReaderBackground;
+            readerConfig.mBatteryWidthAndHeight = this.mBatteryWidthAndHeight;
         }
 
         public ReaderConfig build() {

@@ -447,7 +447,7 @@ public class ReaderView extends View {
                     // 还没有缓存，则开始下载
                     if (!mCache.isCached(adapter.obtainCacheKey(chapterItem))) {
                         final int downloadChapterIndex = i;
-                        ReaderManager.this.download(adapter, chapterItem, downloadChapterIndex, ReaderResolve.UNKOWN, false);
+                        ReaderManager.this.download(adapter, chapterItem, downloadChapterIndex, ReaderResolve.UNKNOWN, false);
                     }
                 }
             }
@@ -490,7 +490,7 @@ public class ReaderView extends View {
                             if (mLastTurnStatus != TurnStatus.LOAD_SUCCESS) {
                                 // 当字符索引未知时，需要计算一下
                                 int tempCharIndex = charIndex;
-                                if (tempCharIndex == ReaderResolve.UNKOWN) {
+                                if (tempCharIndex == ReaderResolve.UNKNOWN) {
                                     if (ReaderManager.this.mReaderResolve.getChapterIndex() < chapterIndex) {
                                         tempCharIndex = ReaderResolve.FIRST_INDEX;
                                     } else {

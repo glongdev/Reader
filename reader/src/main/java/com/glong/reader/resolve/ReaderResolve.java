@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -32,7 +33,7 @@ public class ReaderResolve {
 
     public static final int LAST_INDEX = -1;//表示最后一个
     public static final int FIRST_INDEX = 0;//表示第一个
-    public static final int UNKOWN = -2;//未知，在实际翻页时动态计算
+    public static final int UNKNOWN = -2;//未知，在实际翻页时动态计算
 
     //本章在总章节中的索引
     protected int mChapterIndex;
@@ -53,6 +54,8 @@ public class ReaderResolve {
     private int mAreaWidth;
     private int mAreaHeight;
 
+    // 电池电量
+    private int mBattery = 50;
     /***************************人工智能分割线 外部设置的属性end************************/
 
     //当前章节总页数，页数根据文字间距，字体大小而变化
@@ -73,6 +76,7 @@ public class ReaderResolve {
     private Paint mMainBodyPaint = new Paint(Paint.ANTI_ALIAS_FLAG);//正文的画笔
     private Paint mMarginPaint = new Paint(Paint.ANTI_ALIAS_FLAG);//画边缘的画笔，如：页码、章节名称、电池等
     private Paint mChapterPaint = new Paint(Paint.ANTI_ALIAS_FLAG);// 画章节名称的Paint
+    private Paint mBatteryPaint = new Paint(Paint.ANTI_ALIAS_FLAG);// 画电池的画笔
 
     protected SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", Locale.CHINA);
 
@@ -103,6 +107,9 @@ public class ReaderResolve {
 
         mMarginPaint.setColor(mReaderConfig.getReaderBackground().getTextColor());
         mMarginPaint.setTextSize(40);
+
+        mBatteryPaint.setColor(mReaderConfig.getReaderBackground().getBatteryColor());
+        mBatteryPaint.setStrokeWidth(2);
     }
 
 
@@ -231,18 +238,70 @@ public class ReaderResolve {
                     , mReaderConfig.getPadding()[1], mMarginPaint);
         }
 
-        //step4.在边缘区域画时间
         Paint.FontMetrics fm = mMarginPaint.getFontMetrics();
-        String time = dateFormat.format(new Date());
-        canvas.drawText(time, mReaderConfig.getPadding()[0], mAreaHeight - mReaderConfig.getPadding()[3] / 2 - fm.bottom / 2 + fm.top / 2, mMarginPaint);
+        float baseLine2centerLine = (fm.descent - fm.ascent) / 2 - fm.descent;// 中轴线到基准线距离
 
         //step5.在边缘区域画总百分比
         float percent = (float) mChapterIndex * 100 / mChapterSum + (float) (mPageIndex + 1) * 100f / mPageSum / mChapterSum;
         String percentStr = decimalFormat.format(percent) + "%";
-        canvas.drawText(percentStr, mAreaWidth - mReaderConfig.getPadding()[2] - mMarginPaint.measureText(percentStr),
-                mAreaHeight - mReaderConfig.getPadding()[3] / 2 - fm.bottom / 2 + fm.top / 2, mMarginPaint);
+        drawPercentage(canvas, percent, mAreaWidth - mReaderConfig.getPadding()[2] - mMarginPaint.measureText(percentStr),
+                mAreaHeight - mReaderConfig.getPadding()[3] / 2 + baseLine2centerLine, mMarginPaint);
 
         //step6.在边缘区域画电池
+        int left = mReaderConfig.getPadding()[0];
+        int top = mAreaHeight - mReaderConfig.getPadding()[3] / 2 - mReaderConfig.getBatteryWidthAndHeight()[1] / 2;
+        int right = left + mReaderConfig.getBatteryWidthAndHeight()[0];
+        int bottom = top + mReaderConfig.getBatteryWidthAndHeight()[1];
+        drawBattery(canvas, mBatteryPaint, mBattery, new Rect(left, top, right, bottom), new Rect(left + 2, top + 2, right - 2, bottom - 2));
+
+        //step4.在边缘区域画时间
+        String time = dateFormat.format(new Date());
+        drawTime(canvas, time, right + 20, mAreaHeight - mReaderConfig.getPadding()[3] / 2 + baseLine2centerLine, mMarginPaint);
+    }
+
+    /**
+     * 画电池
+     *
+     * @param canvas       画布
+     * @param batteryPaint 电池画笔
+     * @param battery      电池量
+     * @param outRect      外部Rect
+     * @param innerRect    内部Rect
+     */
+    protected void drawBattery(Canvas canvas, Paint batteryPaint, int battery, Rect outRect, Rect innerRect) {
+        batteryPaint.setStyle(Paint.Style.STROKE);
+        canvas.drawRect(outRect, batteryPaint);
+
+        batteryPaint.setStyle(Paint.Style.FILL);
+        innerRect.right = (int) (innerRect.left + innerRect.width() * (battery * 1f / 100));
+        canvas.drawRect(innerRect, batteryPaint);
+        canvas.drawRect(outRect.right, outRect.top + outRect.height() / 3,
+                outRect.right + outRect.height() / 4, outRect.bottom - outRect.height() / 3, batteryPaint);
+    }
+
+    /**
+     * 画时间
+     *
+     * @param canvas      canvas
+     * @param x           x
+     * @param y           baseline
+     * @param marginPaint Paint
+     */
+    protected void drawTime(Canvas canvas, String time, int x, float y, Paint marginPaint) {
+        canvas.drawText(time, x, y, marginPaint);
+    }
+
+    /**
+     * 画总百分比
+     *
+     * @param canvas      canvas
+     * @param percent     百分数
+     * @param x           x
+     * @param y           baseline
+     * @param marginPaint Paint
+     */
+    private void drawPercentage(Canvas canvas, float percent, float x, float y, Paint marginPaint) {
+        canvas.drawText(decimalFormat.format(percent) + "%", x, y, marginPaint);
     }
 
     /**
@@ -267,7 +326,7 @@ public class ReaderResolve {
      *
      * @param canvas 画布
      */
-    private void drawMainBodyArea(Canvas canvas) {
+    protected void drawMainBodyArea(Canvas canvas) {
         //画正文
         if (mShowLines == null || mShowLines.size() <= 0)
             return;
