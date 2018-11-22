@@ -1,6 +1,7 @@
 package com.glong.reader.cache;
 
 import java.io.File;
+import java.lang.reflect.Type;
 
 /**
  * Created by Garrett on 2018/11/17.
@@ -32,7 +33,7 @@ public abstract class Cache {
 
     public abstract String get(String key);
 
-    public abstract <T> T get(String key, Class<T> clazz);
+    public abstract <T> T get(String key, Type clazz);
 
     public abstract boolean remove(String key);
 

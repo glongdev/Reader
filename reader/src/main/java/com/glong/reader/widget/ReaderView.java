@@ -18,10 +18,14 @@ import com.glong.reader.cache.Cache;
 import com.glong.reader.cache.DiskCache;
 import com.glong.reader.config.ColorsConfig;
 import com.glong.reader.config.ReaderConfig;
-import com.glong.reader.textconvert.TextUtils;
+import com.glong.reader.textconvert.TextBreakUtils;
 import com.glong.reader.util.Log;
+import com.glong.reader.util.NetUtil;
+import com.glong.reader.util.Request;
 
 import java.io.File;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -78,8 +82,6 @@ public class ReaderView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-//        int height = ReaderUtils.measureSize(1000, heightMeasureSpec);
-//        int width = ReaderUtils.measureSize(600, widthMeasureSpec);
         int width = getMeasuredWidth();
         int height = getMeasuredHeight();
         setMeasuredDimension(width, height);
@@ -261,14 +263,11 @@ public class ReaderView extends View {
 
     /**
      * 设置所有颜色相关
-     * 因为颜色都是对应的，比如文字和背景，白色的背景往往对应黑色的文字
+     * 因为颜色都是对应的，比如文字和背景，白色的背景往往对应黑色的文字、黑色的电池颜色等等
      *
      * @param colorsConfig 颜色相关对象
      */
     public void setColorsConfig(@NonNull ColorsConfig colorsConfig) {
-        if (colorsConfig.getBackground() == null) {
-            throw new NullPointerException("colorsConfig#mBackground is null!");
-        }
         getReaderConfig().setColorsConfig(colorsConfig);
         setReaderConfig(mReaderConfig);
     }
@@ -283,8 +282,13 @@ public class ReaderView extends View {
      * @param effect 翻页动效
      */
     public void setEffect(@NonNull Effect effect) {
-        this.mEffect = effect;
-        initEffectConfiguration();
+        if (effect.getClass() != mEffect.getClass()) {
+            this.mEffect = effect;
+            initEffectConfiguration();
+            if (mReaderManager != null) {
+                invalidateBothPage();
+            }
+        }
     }
 
     public Effect getEffect() {
@@ -356,15 +360,14 @@ public class ReaderView extends View {
 
         public abstract String obtainCacheKey(K k);
 
-        public abstract String obtainChapterKey(K k);
-
         public abstract String obtainChapterName(K k);
 
         public abstract String obtainChapterContent(T t);
 
-        public abstract Class<K> castFirstGeneric();
-
-        public abstract Class<T> castSecondGeneric();
+        @Override
+        public Request requestParams(K k) {
+            return null;
+        }
     }
 
     public static abstract class ReaderManager implements IReaderManager {
@@ -458,7 +461,14 @@ public class ReaderView extends View {
             }
 
             final Object chapterItem = adapter.getChapterList().get(chapterIndex);
-            Object cache = mCache.get(adapter.obtainCacheKey(chapterItem), adapter.castSecondGeneric());
+
+            ParameterizedType parameterizedType = (ParameterizedType) adapter.getClass().getGenericSuperclass();
+            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+//            for (Type actualTypeArgument : actualTypeArguments) {
+//                Log.d(TAG, "type :" + actualTypeArgument);
+//            }
+
+            Object cache = mCache.get(adapter.obtainCacheKey(chapterItem), actualTypeArguments[1]);
 
             if (cache == null) {
                 this.download(adapter, chapterItem, chapterIndex, charIndex, true);
@@ -591,7 +601,14 @@ public class ReaderView extends View {
                         mOnReaderWatcherListener.onChapterDownloadStart(chapterIndex);
 
                     ReaderManager.this.mDownloadingQueue.put(chapterIndex, showAfterDownload);
-                    Object downLoad = adapter.downLoad(chapterItem);
+
+                    Object downLoad;
+                    Request request = adapter.requestParams(chapterItem);
+                    if (request == null) {
+                        downLoad = adapter.downLoad(chapterItem);
+                    } else {
+                        downLoad = NetUtil.download(request);
+                    }
 
                     if (downLoad != null) {
                         Log.d(ReaderManager.TAG, "download " + chapterIndex
@@ -680,7 +697,7 @@ public class ReaderView extends View {
          * @param paragraph 分段符
          */
         public void addParagraph(String paragraph) {
-            TextUtils.sParagraph.add(paragraph);
+            TextBreakUtils.sParagraph.add(paragraph);
         }
 
         /**

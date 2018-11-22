@@ -15,28 +15,55 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <FrameLayout
+    <LinearLayout
         android:id="@+id/frameLayout"
         android:layout_width="0dp"
         android:layout_height="36dp"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
         <Button
-            android:id="@+id/prev_chapter_btn"
-            android:layout_width="wrap_content"
+            android:id="@+id/real_one_way"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|start"
-            android:text="上一章" />
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:text="单项2D仿真" />
 
         <Button
-            android:id="@+id/next_chapter_btn"
-            android:layout_width="wrap_content"
+            android:id="@+id/real_both_way"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|end"
-            android:text="下一章" />
-    </FrameLayout>
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:text="双向2D仿真" />
+
+        <Button
+            android:id="@+id/cover"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:text="覆盖" />
+
+        <Button
+            android:id="@+id/slide"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:text="滑动" />
+
+        <Button
+            android:id="@+id/non"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:text="无" />
+    </LinearLayout>
 
 
 </android.support.constraint.ConstraintLayout>

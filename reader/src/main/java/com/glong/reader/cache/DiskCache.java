@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import com.google.gson.Gson;
 
 import java.io.File;
+import java.lang.reflect.Type;
 
 /**
  * Created by Garrett on 2018/11/17.
@@ -35,9 +36,9 @@ public class DiskCache extends Cache {
     }
 
     @Override
-    public <T> T get(String key, Class<T> clazz) {
+    public <T> T get(String key, Type type) {
         String cache = ACache.get(getCacheDir()).getAsString(key);
-        return mGson.fromJson(cache, clazz);
+        return mGson.fromJson(cache, type);
     }
 
     @Override

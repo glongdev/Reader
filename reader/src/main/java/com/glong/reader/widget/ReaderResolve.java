@@ -6,9 +6,6 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -16,7 +13,7 @@ import com.glong.reader.config.ColorsConfig;
 import com.glong.reader.config.ReaderConfig;
 import com.glong.reader.textconvert.ShowChar;
 import com.glong.reader.textconvert.ShowLine;
-import com.glong.reader.textconvert.TextUtils;
+import com.glong.reader.textconvert.TextBreakUtils;
 import com.glong.reader.util.Log;
 
 import java.text.DecimalFormat;
@@ -130,7 +127,7 @@ public class ReaderResolve {
 
         if (!android.text.TextUtils.isEmpty(mTitle)) {
             //计算大标题所占行数
-            mChapterNameLines = TextUtils.breakToLineList(mTitle, usableWidth, 0, mChapterPaint);
+            mChapterNameLines = TextBreakUtils.breakToLineList(mTitle, usableWidth, 0, mChapterPaint);
 
             //计算第0页大章节标题所占高度
             Paint.FontMetrics chapterFM = mChapterPaint.getFontMetrics();
@@ -138,14 +135,14 @@ public class ReaderResolve {
         }
 
         //第0页 能展示多少行正文
-        mLineNumPerPageInFirstPage = TextUtils.measureLines(usableHeight - mChapterTitleHeight, mReaderConfig.getLineSpace(), mMainBodyPaint);
+        mLineNumPerPageInFirstPage = TextBreakUtils.measureLines(usableHeight - mChapterTitleHeight, mReaderConfig.getLineSpace(), mMainBodyPaint);
 
         //正常情况下（除第0页）一页能展示多少行
-        mLineNumPerPageWithoutFirstPage = TextUtils.measureLines(usableHeight, mReaderConfig.getLineSpace(), mMainBodyPaint);
+        mLineNumPerPageWithoutFirstPage = TextBreakUtils.measureLines(usableHeight, mReaderConfig.getLineSpace(), mMainBodyPaint);
 
         //正文所占行数
         if (!android.text.TextUtils.isEmpty(mContent)) {
-            mShowLines = TextUtils.breakToLineList(mContent, usableWidth, 0, mMainBodyPaint);
+            mShowLines = TextBreakUtils.breakToLineList(mContent, usableWidth, 0, mMainBodyPaint);
         }
 
         //计算总页数
@@ -210,20 +207,11 @@ public class ReaderResolve {
     }
 
     /**
-     * 画背景/清空画布
+     * 清空画布
      */
-    protected void drawBackground(Canvas canvas) {
+    private void drawBackground(Canvas canvas) {
         //step1.清空画布
         canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-
-        Drawable drawable = mReaderConfig.getColorsConfig().getBackground();
-        if (drawable instanceof ColorDrawable) {
-            int color = ((ColorDrawable) drawable).getColor();
-            canvas.drawColor(color);
-        } else if (drawable instanceof BitmapDrawable) {
-            //画背景
-        }
-
     }
 
     /**

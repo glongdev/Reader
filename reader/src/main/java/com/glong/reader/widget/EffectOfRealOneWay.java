@@ -334,12 +334,9 @@ public class EffectOfRealOneWay extends Effect {
                         // 向右滑 --> 上一页
                         // 分两种情况，顺利到达上一页 and 取消到上一页
                         if (mVelocityTracker.getXVelocity() <= -500) {// 取消至上一页
-//                            cancelAnimation();
-                            startAnimation();
+                            mScroller.startScroll((int) mTouch.x, mEffectHeight, (int) (-mEffectWidth - mTouch.x), 0, ANIM_DURATION);
                             mPageChangedCallback.toNextPage();// 数据回滚
                         } else {
-//                            startAnimation();
-//                            cancelAnimation();
                             mScroller.startScroll((int) mTouch.x, mEffectHeight, (int) (mEffectWidth - mTouch.x), 0, ANIM_DURATION / 2);
                         }
                         mPageChangedCallback.invalidate();

@@ -1,7 +1,6 @@
 package com.glong.reader.config;
 
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Size;
 
@@ -89,7 +88,7 @@ public class ReaderConfig {
 
         private int[] mBatteryWidthAndHeight = new int[]{60, 20};
 
-        private ColorsConfig mColorsConfig = new ColorsConfig(new ColorDrawable(Color.WHITE), Color.BLACK, Color.BLACK);
+        private ColorsConfig mColorsConfig = new ColorsConfig(Color.BLACK, Color.BLACK);
 
         public Builder setTextSize(@Size int textSize) {
             this.mTextSize = textSize;

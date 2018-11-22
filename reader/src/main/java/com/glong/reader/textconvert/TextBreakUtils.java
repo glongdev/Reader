@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  * 测量工具
  */
-public class TextUtils {
+public class TextBreakUtils {
 
     public static Set<String> sParagraph = new HashSet<>();
 

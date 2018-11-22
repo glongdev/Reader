@@ -1,5 +1,6 @@
 package com.glong.sample;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -7,7 +8,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.glong.reader.widget.EffectOfCover;
+import com.glong.reader.widget.EffectOfNon;
+import com.glong.reader.widget.EffectOfRealBothWay;
 import com.glong.reader.widget.EffectOfRealOneWay;
+import com.glong.reader.widget.EffectOfSlide;
 import com.glong.reader.widget.ReaderView;
 import com.glong.sample.entry.ChapterContentBean;
 import com.glong.sample.entry.ChapterItemBean;
@@ -50,21 +55,45 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        findViewById(R.id.prev_chapter_btn).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.real_one_way).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mReaderManager.toPrevChapter();
-                mReaderView.invalidateBothPage();
+//                mReaderManager.toPrevChapter();
+//                mReaderView.invalidateBothPage();
+                mReaderView.setEffect(new EffectOfRealOneWay(MainActivity.this));
             }
         });
 
-        findViewById(R.id.next_chapter_btn).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.real_both_way).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mReaderManager.toNextChapter();
-                mReaderView.invalidateBothPage();
+//                mReaderManager.toNextChapter();
+//                mReaderView.invalidateBothPage();
+                mReaderView.setEffect(new EffectOfRealBothWay(MainActivity.this));
             }
         });
+
+        findViewById(R.id.cover).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mReaderView.setEffect(new EffectOfCover(MainActivity.this));
+            }
+        });
+
+        findViewById(R.id.slide).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mReaderView.setEffect(new EffectOfSlide(MainActivity.this));
+            }
+        });
+
+        findViewById(R.id.non).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mReaderView.setEffect(new EffectOfNon(MainActivity.this));
+            }
+        });
+
     }
 
     private void initData() {
@@ -99,11 +128,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public String obtainChapterKey(ChapterItemBean chapterItemBean) {
-                return chapterItemBean.getChapterId();
-            }
-
-            @Override
             public String obtainChapterName(ChapterItemBean chapterItemBean) {
                 return chapterItemBean.getChapterName();
             }
@@ -111,16 +135,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public String obtainChapterContent(ChapterContentBean chapterContentBean) {
                 return chapterContentBean.getChapterContent();
-            }
-
-            @Override
-            public Class<ChapterItemBean> castFirstGeneric() {
-                return ChapterItemBean.class;
-            }
-
-            @Override
-            public Class<ChapterContentBean> castSecondGeneric() {
-                return ChapterContentBean.class;
             }
 
             @Override
@@ -137,8 +151,16 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return null;
             }
+
+//            @Override
+//            public Request requestParams(ChapterItemBean chapterItemBean) {
+//                return new Request.Builder().baseUrl("").addUrlParams("page", "0").addBody("chapterId", 123)
+//                        .addHeader("head", "header").post().build();
+//            }
         };
 
         mReaderView.setAdapter(mAdapter);
+
+        mReaderView.setBackgroundColor(Color.GREEN);
     }
 }
