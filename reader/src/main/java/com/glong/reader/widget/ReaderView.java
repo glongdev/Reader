@@ -73,7 +73,7 @@ public class ReaderView extends View {
 
     public ReaderView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mEffect = new EffectOfNon(context);
+        mEffect = new EffectOfRealOneWay(context);
         mReaderConfig = new ReaderConfig.Builder().build();
         mPageChangedCallback = new SimplePageChangedCallback();
         mObserver = new AdapterDataObserver();
@@ -370,8 +370,10 @@ public class ReaderView extends View {
         }
     }
 
-    public static abstract class ReaderManager implements IReaderManager {
+    public static class ReaderManager implements IReaderManager {
         private static final String TAG = "ReaderView#ReaderManage";
+
+        private boolean mIsUsingCache;
 
         private TurnStatus mLastTurnStatus = TurnStatus.IDLE;
         ReaderView mReaderView;
@@ -485,13 +487,33 @@ public class ReaderView extends View {
         }
 
         @Override
-        public void startFromCache(String key, Class clazz, int charIndex) {
-
+        public void startFromCache(String key, int chapterIndex, int charIndex, @NonNull String chapterName) {
+            if (mReaderView == null)
+                throw new NullPointerException("mReaderView == null,Have you already called method ReaderView#setReaderMananger()");
+            startFromCache(mCache.getCacheDir(), key, chapterIndex, charIndex, chapterName);
         }
 
         @Override
-        public void startFromCache(File cacheDir, String key, Class clazz, int charIndex) {
-
+        public void startFromCache(File cacheDir, String key, int chapterIndex, int charIndex, @NonNull String chapterName) {
+            if (mReaderView == null)
+                throw new NullPointerException("mReaderView == null,Have you already called method ReaderView#setReaderManger()?");
+            Adapter adapter = mReaderView.getAdapter();
+            if (adapter == null)
+                throw new NullPointerException("Have you already called method ReaderView#setAdapter()?");
+            mCache.setCacheDir(cacheDir);
+            ParameterizedType parameterizedType = (ParameterizedType) adapter.getClass().getGenericSuperclass();
+            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+            Object cache = mCache.get(key, actualTypeArguments[1]);
+            if (cache != null) {
+                mReaderResolve.setArea(mReaderView.getMeasuredWidth(), mReaderView.getMeasuredHeight());
+                mReaderResolve.setChapterSum(1);
+                setUpReaderResolve(chapterIndex, charIndex, chapterName, adapter.obtainChapterContent(cache));
+                mIsUsingCache = true;
+                ReaderManager.this.mReaderView.invalidateBothPage();
+            } else {
+                mReaderResolve.setChapterIndex(chapterIndex);
+                mReaderResolve.setCharIndex(charIndex);
+            }
         }
 
         void setReaderView(ReaderView readerView, @NonNull ReaderConfig readerConfig) {
@@ -543,7 +565,7 @@ public class ReaderView extends View {
         /**
          * 更新ReaderResolve
          */
-        private void setUpReaderResolve(int chapterIndex, int charIndex, String title, String content) {
+        private void setUpReaderResolve(int chapterIndex, int charIndex, @NonNull String title, String content) {
             mReaderResolve.setChapterIndex(chapterIndex);
             mReaderResolve.setCharIndex(charIndex);
             mReaderResolve.setTitle(title);
@@ -659,11 +681,16 @@ public class ReaderView extends View {
 //                    ReaderManager.this.mReaderView.getMeasuredHeight());
             ReaderManager.this.mReaderResolve.setChapterSum(adapter.getChapterCount());
 
+            if (mIsUsingCache) {
+                mIsUsingCache = false;
+                return TurnStatus.IDLE;
+            }
+
             int chapterIndex = 0;
             if (ReaderManager.this.mReaderResolve.getChapterIndex() <= adapter.getChapterCount()) {
                 chapterIndex = ReaderManager.this.mReaderResolve.getChapterIndex();
             }
-            return ReaderManager.this.toSpecifiedChapter(chapterIndex, 0);
+            return ReaderManager.this.toSpecifiedChapter(chapterIndex, mReaderResolve.getCharIndex());
         }
 
         public OnReaderWatcherListener getOnReaderWatcherListener() {

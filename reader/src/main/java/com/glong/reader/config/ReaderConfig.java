@@ -86,7 +86,7 @@ public class ReaderConfig {
 
         private int mLineSpace = 10;
 
-        private int[] mBatteryWidthAndHeight = new int[]{60, 20};
+        private int[] mBatteryWidthAndHeight = new int[]{60, 30};
 
         private ColorsConfig mColorsConfig = new ColorsConfig(Color.BLACK, Color.BLACK);
 

@@ -1,6 +1,7 @@
 package com.glong.reader.widget;
 
 import android.graphics.Canvas;
+import android.support.annotation.NonNull;
 
 import com.glong.reader.TurnStatus;
 
@@ -52,21 +53,21 @@ interface IReaderManager {
     /**
      * 从缓存启动阅读器
      *
-     * @param key       缓存键
-     * @param clazz     缓存Class类型
-     * @param charIndex 跳转到缓存的那个字符
+     * @param key          缓存键
+     * @param chapterIndex 章节索引
+     * @param charIndex    跳转到缓存的那个字符
      */
-    void startFromCache(String key, Class clazz, int charIndex);
+    void startFromCache(String key, int chapterIndex, int charIndex, @NonNull String chapterName);
 
     /**
      * 从缓存启动阅读器
      *
-     * @param cacheDir  缓存路径
-     * @param key       缓存键
-     * @param clazz     缓存Class类型
-     * @param charIndex 跳转到缓存的那个字符
+     * @param cacheDir     缓存路径
+     * @param key          缓存键
+     * @param chapterIndex 章节索引
+     * @param charIndex    跳转到缓存的那个字符
      */
-    void startFromCache(File cacheDir, String key, Class clazz, int charIndex);
+    void startFromCache(File cacheDir, String key, int chapterIndex, int charIndex, @NonNull String chapterName);
 
     void drawPage(Canvas canvas);
 }

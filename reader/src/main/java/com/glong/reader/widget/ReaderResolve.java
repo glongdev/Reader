@@ -44,7 +44,7 @@ public class ReaderResolve {
     protected String mContent = "";
 
     //当前章节标题
-    protected String mTitle;
+    protected String mTitle = "";
 
     // 总章节数
     protected int mChapterSum;
@@ -125,14 +125,12 @@ public class ReaderResolve {
         //除边缘区域外的区域高度
         int usableHeight = mAreaHeight - paddingTop - paddingBottom;
 
-        if (!android.text.TextUtils.isEmpty(mTitle)) {
-            //计算大标题所占行数
-            mChapterNameLines = TextBreakUtils.breakToLineList(mTitle, usableWidth, 0, mChapterPaint);
+        //计算大标题所占行数
+        mChapterNameLines = TextBreakUtils.breakToLineList(mTitle, usableWidth, 0, mChapterPaint);
 
-            //计算第0页大章节标题所占高度
-            Paint.FontMetrics chapterFM = mChapterPaint.getFontMetrics();
-            mChapterTitleHeight = (int) (mChapterNameLines.size() * (chapterFM.bottom - chapterFM.top + mReaderConfig.getLineSpace()) * 1.5f);
-        }
+        //计算第0页大章节标题所占高度
+        Paint.FontMetrics chapterFM = mChapterPaint.getFontMetrics();
+        mChapterTitleHeight = (int) (mChapterNameLines.size() * (chapterFM.bottom - chapterFM.top + mReaderConfig.getLineSpace()) * 1.5f);
 
         //第0页 能展示多少行正文
         mLineNumPerPageInFirstPage = TextBreakUtils.measureLines(usableHeight - mChapterTitleHeight, mReaderConfig.getLineSpace(), mMainBodyPaint);
@@ -159,9 +157,12 @@ public class ReaderResolve {
      * 根据字符索引计算页码
      */
     private void calculatePageIndex() {
+        Log.d(TAG, " start calculatePageIndex --- charIndex: " + mCharIndex + " showLines.size == " + mShowLines.size());
         if (mCharIndex == FIRST_INDEX) {
             mPageIndex = 0;
         } else if (mCharIndex == LAST_INDEX) {
+            mPageIndex = mPageSum - 1;
+        } else if (mCharIndex >= mContent.length()) {
             mPageIndex = mPageSum - 1;
         } else {
             //step 1.计算当前字符索引在哪一行
@@ -169,7 +170,7 @@ public class ReaderResolve {
             // 为了提升效率，如果字符索引在mContent.length()后半部分，则从后半部分遍历
             int lineIndex = 0;
             if (mCharIndex >= mContent.length() / 2) {
-                for (int i = mPageSum - 1; i >= 0; --i) {
+                for (int i = mShowLines.size() - 1; i >= 0; --i) {
                     ShowLine showLine = mShowLines.get(i);
                     if (mCharIndex >= showLine.getLineFirstIndexInChapter() && mCharIndex <= showLine.getLineLastIndexInChapter()) {
                         lineIndex = i;
@@ -177,7 +178,7 @@ public class ReaderResolve {
                     }
                 }
             } else {
-                for (int i = 0; i <= mPageSum - 1; i++) {
+                for (int i = 0; i <= mShowLines.size() - 1; i++) {
                     ShowLine showLine = mShowLines.get(i);
                     if (mCharIndex >= showLine.getLineFirstIndexInChapter() && mCharIndex <= showLine.getLineLastIndexInChapter()) {
                         lineIndex = i;
@@ -192,10 +193,11 @@ public class ReaderResolve {
                 mPageIndex = (lineIndex - mLineNumPerPageInFirstPage) / mLineNumPerPageWithoutFirstPage + 1;
             }
         }
+        Log.d(TAG, "pageIndex : " + mPageIndex);
     }
 
     public void drawPage(Canvas canvas) {
-        Log.d(TAG, "start drawPage,title:" + mTitle + " ,content:" + mContent);
+//        Log.d(TAG, "start drawPage,title:" + mTitle + " ,content:" + mContent);
         drawBackground(canvas);
         drawMarginArea(canvas);
         if (mTitle != null) {
@@ -322,7 +324,8 @@ public class ReaderResolve {
      * @param marginPaint Paint
      */
     private void drawPercentage(Canvas canvas, float percent, float x, float y, Paint marginPaint) {
-        canvas.drawText(decimalFormat.format(percent) + "%", x, y, marginPaint);
+        if (percent <= 100)
+            canvas.drawText(decimalFormat.format(percent) + "%", x, y, marginPaint);
     }
 
     /**
@@ -351,8 +354,6 @@ public class ReaderResolve {
         //画正文
         if (mShowLines == null || mShowLines.size() <= 0)
             return;
-        //char 文字索引
-        mCharIndex = mShowLines.get(0).getLineFirstIndexInChapter();
 
         Paint.FontMetrics fm = mMainBodyPaint.getFontMetrics();
         float textHeight = fm.bottom - fm.top;
@@ -401,6 +402,18 @@ public class ReaderResolve {
         }
     }
 
+    /**
+     * @return 当前页第一个字符索引
+     */
+    public int getCurrPageFirstCharIndex() {
+        if (mPageIndex == 0) {
+            return 0;
+        } else {
+            int pageFirstLineIndex = mLineNumPerPageInFirstPage + (mPageIndex - 1) * mLineNumPerPageWithoutFirstPage;
+            return mShowLines.get(pageFirstLineIndex).getLineFirstIndexInChapter();
+        }
+    }
+
     public int getPageIndex() {
         return mPageIndex;
     }
@@ -438,6 +451,7 @@ public class ReaderResolve {
     }
 
     public void setCharIndex(int charIndex) {
+        Log.d(TAG, "charIndex change! oldCharIndex:" + mCharIndex + " ,charIndex:" + charIndex);
         mCharIndex = charIndex;
     }
 

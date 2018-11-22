@@ -97,26 +97,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initData() {
-        List<ChapterItemBean> chapters = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            ChapterItemBean bean = new ChapterItemBean();
-            bean.setChapterId(String.valueOf("id" + i));
-            bean.setChapterName("第" + i + "章");
-            chapters.add(bean);
-        }
-        mAdapter.setChapterList(chapters);
-        mAdapter.notifyDataSetChanged();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                final List<ChapterItemBean> chapters = new ArrayList<>();
+                for (int i = 0; i < 100; i++) {
+                    ChapterItemBean bean = new ChapterItemBean();
+                    bean.setChapterId(String.valueOf("id" + i));
+                    bean.setChapterName("第" + i + "章");
+                    chapters.add(bean);
+                }
+                mReaderView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mAdapter.setChapterList(chapters);
+                        mAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+        }).start();
     }
 
     private void initReader() {
         mReaderView = findViewById(R.id.reader_view);
 
-        mReaderManager = new ReaderView.ReaderManager() {
-            @Override
-            public void startFromCache(String key, Class clazz, int charIndex) {
-                super.startFromCache(key, clazz, charIndex);
-            }
-        };
+        mReaderManager = new ReaderView.ReaderManager();
 
         mReaderView.setReaderManager(mReaderManager);
         mReaderView.setEffect(new EffectOfRealOneWay(this));
@@ -162,5 +172,6 @@ public class MainActivity extends AppCompatActivity {
         mReaderView.setAdapter(mAdapter);
 
         mReaderView.setBackgroundColor(Color.GREEN);
+        mReaderManager.startFromCache("id5", 5, 500, "第5章 Android studio is A good IDE.I say!");
     }
 }
