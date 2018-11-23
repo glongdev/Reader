@@ -38,6 +38,18 @@ public class ReaderConfig {
     private ReaderConfig() {
     }
 
+    private ReaderConfig(ReaderConfig config) {
+        this.mBatteryWidthAndHeight = config.mBatteryWidthAndHeight;
+        this.mLineSpace = config.mLineSpace;
+        this.mPadding = config.mPadding;
+        this.mTextSize = config.mTextSize;
+        this.mColorsConfig = config.mColorsConfig;
+    }
+
+    public static ReaderConfig newInstance(ReaderConfig config) {
+        return new ReaderConfig(config);
+    }
+
     public int getTextSize() {
         return mTextSize;
     }
@@ -82,7 +94,7 @@ public class ReaderConfig {
 
         private int mTextSize = 60;
 
-        private int[] mPadding = {40, 70, 40, 60};
+        private int[] mPadding = {40, 70, 40, 70};
 
         private int mLineSpace = 10;
 

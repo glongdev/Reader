@@ -311,6 +311,7 @@ public class ReaderResolve {
      * @param marginPaint Paint
      */
     protected void drawTime(Canvas canvas, String time, int x, float y, Paint marginPaint) {
+        Log.d(TAG, "drawTime, x:" + x + " ,y:" + y);
         canvas.drawText(time, x, y, marginPaint);
     }
 
@@ -505,12 +506,14 @@ public class ReaderResolve {
         int[] newPadding = readerConfig.getPadding();
         ColorsConfig newColorsConfig = readerConfig.getColorsConfig();
 
+
         if (oldTextSize != newTextSize || oldColorsConfig.getTextColor() != newColorsConfig.getTextColor()
                 || oldColorsConfig.getBatteryColor() != newColorsConfig.getBatteryColor()) {
             initPaints();
         }
 
         if (oldTextSize != newTextSize || oldLineSpace != newLineSpace || oldPadding != newPadding) {
+            mCharIndex = getCurrPageFirstCharIndex();
             calculateChapterParameter();
         }
     }

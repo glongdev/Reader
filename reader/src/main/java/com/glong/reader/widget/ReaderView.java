@@ -80,13 +80,10 @@ public class ReaderView extends View {
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
         int width = getMeasuredWidth();
         int height = getMeasuredHeight();
-        setMeasuredDimension(width, height);
-
-        initEffectConfiguration();
         if (mCurrPageBitmap == null && mNextPageBitmap == null) {
             mCurrPageBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444);
             mNextPageBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444);
@@ -101,6 +98,7 @@ public class ReaderView extends View {
                 mReaderManager.drawPage(mCurrPageCanvas);
             }
         }
+        initEffectConfiguration();
     }
 
     /**
@@ -187,9 +185,10 @@ public class ReaderView extends View {
      */
     public void setReaderConfig(@NonNull ReaderConfig readerConfig) {
         this.mReaderConfig = readerConfig;
-        if (mReaderManager != null) {
-            mReaderManager.setReaderConfig(mReaderConfig);
+        if (mReaderManager == null) {
+            throw new NullPointerException("You must set A ReaderManager to ReaderView!");
         }
+        mReaderManager.setReaderConfig(mReaderConfig);
     }
 
     /**
@@ -204,8 +203,10 @@ public class ReaderView extends View {
      */
     public void setTextSize(int textSize) {
         if (textSize > 0) {
-            getReaderConfig().setTextSize(textSize);
+            mReaderConfig = ReaderConfig.newInstance(getReaderConfig());
+            mReaderConfig.setTextSize(textSize);
             setReaderConfig(mReaderConfig);
+            invalidateBothPage();
         }
     }
 
@@ -218,8 +219,10 @@ public class ReaderView extends View {
      */
     public void setLineSpace(int lineSpace) {
         if (lineSpace >= 0) {
-            getReaderConfig().setLineSpace(lineSpace);
+            mReaderConfig = ReaderConfig.newInstance(getReaderConfig());
+            mReaderConfig.setLineSpace(lineSpace);
             setReaderConfig(mReaderConfig);
+            invalidateBothPage();
         }
     }
 
@@ -238,6 +241,7 @@ public class ReaderView extends View {
         }
         getReaderConfig().setPadding(padding);
         setReaderConfig(mReaderConfig);
+        invalidateBothPage();
     }
 
     public int[] getBodyTextPadding() {
@@ -255,6 +259,7 @@ public class ReaderView extends View {
         }
         getReaderConfig().setBatteryWidthAndHeight(widthAndHeight);
         setReaderConfig(mReaderConfig);
+        invalidateBothPage();
     }
 
     public int[] getBatteryWidthAndHeight() {
@@ -270,6 +275,7 @@ public class ReaderView extends View {
     public void setColorsConfig(@NonNull ColorsConfig colorsConfig) {
         getReaderConfig().setColorsConfig(colorsConfig);
         setReaderConfig(mReaderConfig);
+        invalidateBothPage();
     }
 
     public ColorsConfig getColorsConfig() {
@@ -307,6 +313,15 @@ public class ReaderView extends View {
     public void setPageChangedCallback(@NonNull PageChangedCallback pageChangedCallback) {
         mPageChangedCallback = pageChangedCallback;
         mEffect.setPageChangedCallback(pageChangedCallback);
+    }
+
+    /**
+     * 增加分段符号
+     *
+     * @param paragraph 分段符
+     */
+    public void addParagraph(String paragraph) {
+        TextBreakUtils.sParagraph.add(paragraph);
     }
 
     /**
@@ -716,15 +731,6 @@ public class ReaderView extends View {
                         Toast.makeText(mReaderView.getContext(), msg, Toast.LENGTH_SHORT).show();
                     }
                 });
-        }
-
-        /**
-         * 增加分段符号
-         *
-         * @param paragraph 分段符
-         */
-        public void addParagraph(String paragraph) {
-            TextBreakUtils.sParagraph.add(paragraph);
         }
 
         /**
