@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+    <color name="colorPrimary">#2196F3</color>
+    <color name="colorPrimaryDark">#1976D2</color>
+    <color name="colorAccent">#2196F3</color>536DFE
+
+    <!--reader-->
+    <color name="reader_bg_0">#f7f3ef</color>
+    <color name="reader_bg_1">#d8c9aa</color>
+    <color name="reader_bg_2">#cce8cf</color>
+    <color name="reader_bg_3">#b69b94</color>
 </resources>
