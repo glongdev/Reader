@@ -513,7 +513,6 @@ public class ReaderResolve {
         }
 
         if (oldTextSize != newTextSize || oldLineSpace != newLineSpace || oldPadding != newPadding) {
-            mCharIndex = getCurrPageFirstCharIndex();
             calculateChapterParameter();
         }
     }
@@ -529,5 +528,9 @@ public class ReaderResolve {
      */
     public void setBattery(int battery) {
         mBattery = battery;
+    }
+
+    Paint getBodyTextPaint() {
+        return mMainBodyPaint;
     }
 }

@@ -35,8 +35,8 @@ public class EffectOfNon extends Effect {
                     turnStatus = mPageChangedCallback.toPrevPage();
                 }
                 if (turnStatus == TurnStatus.LOAD_SUCCESS) {
-                    mPageChangedCallback.drawCurrPage();
-                    mPageChangedCallback.invalidate();
+                    mPageDrawingCallback.drawCurrPage();
+                    mPageDrawingCallback.invalidate();
                 }
         }
         return false;

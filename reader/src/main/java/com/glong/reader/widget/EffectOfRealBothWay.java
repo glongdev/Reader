@@ -223,8 +223,8 @@ public class EffectOfRealBothWay extends Effect {
                 this.mDownTime = System.currentTimeMillis();
 
                 abortAnimation();
-                mPageChangedCallback.drawCurrPage();
-                mPageChangedCallback.invalidate();
+                mPageDrawingCallback.drawCurrPage();
+                mPageDrawingCallback.invalidate();
                 return true;
             case MotionEvent.ACTION_MOVE:
                 float dxFromDown = x - mDownX;
@@ -246,7 +246,7 @@ public class EffectOfRealBothWay extends Effect {
                         if (mTurnStatus == TurnStatus.LOAD_SUCCESS) {
                             Log.d(getClass().getSimpleName(), "drawNextPage -- ");
                             abortAnimation();
-                            mPageChangedCallback.drawNextPage();
+                            mPageDrawingCallback.drawNextPage();
                         }
 
                         if (mStartMoveY >= mEffectHeight / 3 && mStartMoveY <= mEffectHeight * 2 / 3) {
@@ -263,7 +263,7 @@ public class EffectOfRealBothWay extends Effect {
                     setUpTouchY(y);
 
                     calcBezierPoints();
-                    mPageChangedCallback.invalidate();
+                    mPageDrawingCallback.invalidate();
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -276,24 +276,24 @@ public class EffectOfRealBothWay extends Effect {
                         //向左滑 --> 下一页
                         if (mPageChangedCallback.toNextPage() == TurnStatus.LOAD_SUCCESS) {
                             Log.d(getClass().getSimpleName(), "start scroll to next page!");
-                            mPageChangedCallback.drawNextPage();
+                            mPageDrawingCallback.drawNextPage();
 
                             calcCornerXY(mEffectWidth, mEffectHeight);
                             mTouch.y = mEffectHeight;
                             mTouch.x = x;
                             startAnimation();
-                            mPageChangedCallback.invalidate();
+                            mPageDrawingCallback.invalidate();
                         }
                     } else {
                         // 向右滑 --> 上一页
                         if (mPageChangedCallback.toPrevPage() == TurnStatus.LOAD_SUCCESS) {
-                            mPageChangedCallback.drawNextPage();
+                            mPageDrawingCallback.drawNextPage();
 
                             calcCornerXY(0, mEffectHeight);
                             mTouch.y = mEffectHeight;
                             mTouch.x = x;
                             startAnimation();
-                            mPageChangedCallback.invalidate();
+                            mPageDrawingCallback.invalidate();
                         }
                     }
                 }
@@ -314,7 +314,7 @@ public class EffectOfRealBothWay extends Effect {
                         } else {
                             startAnimation();
                         }
-                        mPageChangedCallback.invalidate();
+                        mPageDrawingCallback.invalidate();
                     } else {
                         // 向右滑 --> 上一页
                         // 分两种情况，顺利到达上一页 and 取消到上一页
@@ -324,7 +324,7 @@ public class EffectOfRealBothWay extends Effect {
                         } else {
                             startAnimation();
                         }
-                        mPageChangedCallback.invalidate();
+                        mPageDrawingCallback.invalidate();
                     }
                 }
                 break;
@@ -711,7 +711,7 @@ public class EffectOfRealBothWay extends Effect {
             mTouch.x = x;
             mTouch.y = y;
             calcBezierPoints();
-            mPageChangedCallback.invalidate();
+            mPageDrawingCallback.invalidate();
         }
     }
 

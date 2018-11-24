@@ -53,8 +53,8 @@ public class EffectOfCover extends Effect {
                 this.mDownTime = System.currentTimeMillis();
 
                 abortAnimation();
-                mPageChangedCallback.drawCurrPage();
-                mPageChangedCallback.invalidate();
+                mPageDrawingCallback.drawCurrPage();
+                mPageDrawingCallback.invalidate();
                 return true;
             case MotionEvent.ACTION_MOVE:
                 float dxFromDown = x - mDownX;
@@ -70,7 +70,7 @@ public class EffectOfCover extends Effect {
                         }
                         if (mTurnStatus == TurnStatus.LOAD_SUCCESS) {
                             Log.d(getClass().getSimpleName(), "drawNextPage -- ");
-                            mPageChangedCallback.drawNextPage();
+                            mPageDrawingCallback.drawNextPage();
                         }
                     }
                 }
@@ -85,7 +85,7 @@ public class EffectOfCover extends Effect {
                     }
                     if (dxMove * (mStartMoveX - mDownX) >= 0) {
                         mMoveVector = dxMove;
-                        mPageChangedCallback.invalidate();
+                        mPageDrawingCallback.invalidate();
                     }
                 }
                 break;
@@ -98,16 +98,16 @@ public class EffectOfCover extends Effect {
                         //向左滑 --> 下一页
                         if (mPageChangedCallback.toNextPage() == TurnStatus.LOAD_SUCCESS) {
                             Log.d(getClass().getSimpleName(), "start scroll to next page!");
-                            mPageChangedCallback.drawNextPage();
+                            mPageDrawingCallback.drawNextPage();
                             mScroller.startScroll(0, 0, -mEffectWidth - mShadowWidth, 0, ANIM_DURATION);
-                            mPageChangedCallback.invalidate();
+                            mPageDrawingCallback.invalidate();
                         }
                     } else {
                         // 向右滑 --> 上一页
                         if (mPageChangedCallback.toPrevPage() == TurnStatus.LOAD_SUCCESS) {
-                            mPageChangedCallback.drawNextPage();
+                            mPageDrawingCallback.drawNextPage();
                             mScroller.startScroll(0, 0, mEffectWidth, 0, ANIM_DURATION);
-                            mPageChangedCallback.invalidate();
+                            mPageDrawingCallback.invalidate();
                         }
                     }
                 }
@@ -125,7 +125,7 @@ public class EffectOfCover extends Effect {
                         } else {
                             mScroller.startScroll((int) mMoveVector, 0, (int) (-mEffectWidth - mMoveVector - mShadowWidth), 0, ANIM_DURATION);
                         }
-                        mPageChangedCallback.invalidate();
+                        mPageDrawingCallback.invalidate();
                     } else {
                         // 向右滑 --> 上一页
                         // 分两种情况，顺利到达上一页 and 取消到上一页
@@ -135,7 +135,7 @@ public class EffectOfCover extends Effect {
                         } else {
                             mScroller.startScroll((int) mMoveVector, 0, (int) (mEffectWidth - mMoveVector), 0, ANIM_DURATION);
                         }
-                        mPageChangedCallback.invalidate();
+                        mPageDrawingCallback.invalidate();
                     }
                 }
                 break;
@@ -155,7 +155,7 @@ public class EffectOfCover extends Effect {
     public void computeScroll() {
         if (mScroller.computeScrollOffset()) {
             mMoveVector = mScroller.getCurrX();
-            mPageChangedCallback.invalidate();
+            mPageDrawingCallback.invalidate();
         }
     }
 

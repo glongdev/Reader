@@ -17,6 +17,7 @@ public abstract class Effect {
     protected Bitmap mNextPageBitmap;
 
     protected PageChangedCallback mPageChangedCallback;
+    protected PageDrawingCallback mPageDrawingCallback;
 
     protected Scroller mScroller;
     protected VelocityTracker mVelocityTracker = VelocityTracker.obtain();
@@ -47,6 +48,14 @@ public abstract class Effect {
 
     public void setPageChangedCallback(PageChangedCallback pageChangedCallback) {
         mPageChangedCallback = pageChangedCallback;
+    }
+
+    public PageDrawingCallback getPageDrawingCallback() {
+        return mPageDrawingCallback;
+    }
+
+    public void setPageDrawingCallback(PageDrawingCallback pageDrawingCallback) {
+        mPageDrawingCallback = pageDrawingCallback;
     }
 
     /**

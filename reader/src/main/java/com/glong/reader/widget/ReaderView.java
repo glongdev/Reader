@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Observable;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.os.BatteryManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -60,6 +61,7 @@ public class ReaderView extends View {
     private ReaderConfig mReaderConfig;
 
     private PageChangedCallback mPageChangedCallback;
+    private PageDrawingCallback mPageDrawingCallback;
 
     private AdapterDataObserver mObserver;
 
@@ -75,7 +77,9 @@ public class ReaderView extends View {
         super(context, attrs, defStyleAttr);
         mEffect = new EffectOfRealOneWay(context);
         mReaderConfig = new ReaderConfig.Builder().build();
-        mPageChangedCallback = new SimplePageChangedCallback();
+        SimplePageChangedCallback simplePageChangedCallback = new SimplePageChangedCallback();
+        mPageChangedCallback = simplePageChangedCallback;
+        mPageDrawingCallback = simplePageChangedCallback;
         mObserver = new AdapterDataObserver();
     }
 
@@ -107,6 +111,7 @@ public class ReaderView extends View {
     private void initEffectConfiguration() {
         mEffect.config(getMeasuredWidth(), getMeasuredHeight(), mCurrPageBitmap, mNextPageBitmap);
         mEffect.setPageChangedCallback(mPageChangedCallback);
+        mEffect.setPageDrawingCallback(mPageDrawingCallback);
     }
 
     @Override
@@ -195,7 +200,7 @@ public class ReaderView extends View {
      * @return 如果没设置会返回一个默认的ReaderConfig
      */
     public ReaderConfig getReaderConfig() {
-        return this.mReaderConfig;
+        return ReaderConfig.newInstance(mReaderConfig);
     }
 
     /**
@@ -203,9 +208,9 @@ public class ReaderView extends View {
      */
     public void setTextSize(int textSize) {
         if (textSize > 0) {
-            mReaderConfig = ReaderConfig.newInstance(getReaderConfig());
-            mReaderConfig.setTextSize(textSize);
-            setReaderConfig(mReaderConfig);
+            ReaderConfig readerConfig = getReaderConfig();
+            readerConfig.setTextSize(textSize);
+            setReaderConfig(readerConfig);
             invalidateBothPage();
         }
     }
@@ -219,9 +224,9 @@ public class ReaderView extends View {
      */
     public void setLineSpace(int lineSpace) {
         if (lineSpace >= 0) {
-            mReaderConfig = ReaderConfig.newInstance(getReaderConfig());
-            mReaderConfig.setLineSpace(lineSpace);
-            setReaderConfig(mReaderConfig);
+            ReaderConfig readerConfig = getReaderConfig();
+            readerConfig.setLineSpace(lineSpace);
+            setReaderConfig(readerConfig);
             invalidateBothPage();
         }
     }
@@ -239,8 +244,9 @@ public class ReaderView extends View {
         if (padding.length != 4) {
             throw new IllegalArgumentException("padding length must == 4");
         }
-        getReaderConfig().setPadding(padding);
-        setReaderConfig(mReaderConfig);
+        ReaderConfig readerConfig = getReaderConfig();
+        readerConfig.setPadding(padding);
+        setReaderConfig(readerConfig);
         invalidateBothPage();
     }
 
@@ -257,9 +263,17 @@ public class ReaderView extends View {
         if (widthAndHeight.length != 2) {
             throw new IllegalArgumentException("battery widthAndHeight length must == 2");
         }
-        getReaderConfig().setBatteryWidthAndHeight(widthAndHeight);
-        setReaderConfig(mReaderConfig);
+        ReaderConfig readerConfig = getReaderConfig();
+        readerConfig.setBatteryWidthAndHeight(widthAndHeight);
+        setReaderConfig(readerConfig);
         invalidateBothPage();
+    }
+
+    public Paint getBodyTextPaint() {
+        if (mReaderManager == null) {
+            throw new NullPointerException("You must set A ReaderManager to ReaderView!");
+        }
+        return mReaderManager.getBodyTextPaint();
     }
 
     public int[] getBatteryWidthAndHeight() {
@@ -273,8 +287,9 @@ public class ReaderView extends View {
      * @param colorsConfig 颜色相关对象
      */
     public void setColorsConfig(@NonNull ColorsConfig colorsConfig) {
-        getReaderConfig().setColorsConfig(colorsConfig);
-        setReaderConfig(mReaderConfig);
+        ReaderConfig readerConfig = getReaderConfig();
+        readerConfig.setColorsConfig(colorsConfig);
+        setReaderConfig(readerConfig);
         invalidateBothPage();
     }
 
@@ -313,6 +328,18 @@ public class ReaderView extends View {
     public void setPageChangedCallback(@NonNull PageChangedCallback pageChangedCallback) {
         mPageChangedCallback = pageChangedCallback;
         mEffect.setPageChangedCallback(pageChangedCallback);
+    }
+
+    public PageDrawingCallback getPageDrawingCallback() {
+        return mPageDrawingCallback;
+    }
+
+    /**
+     * 设置刷新和画的回调
+     */
+    public void setPageDrawingCallback(PageDrawingCallback pageDrawingCallback) {
+        mPageDrawingCallback = pageDrawingCallback;
+        mEffect.setPageDrawingCallback(pageDrawingCallback);
     }
 
     /**
@@ -423,6 +450,7 @@ public class ReaderView extends View {
             if (pageIndex > 0) {
                 mReaderResolve.setPageIndex(pageIndex - 1);
 
+                mReaderResolve.setCharIndex(mReaderResolve.getCurrPageFirstCharIndex());
                 if (mOnReaderWatcherListener != null) {
                     mOnReaderWatcherListener.onPageChanged(mReaderResolve.getPageIndex());
                 }
@@ -437,6 +465,7 @@ public class ReaderView extends View {
             if (pageIndex < mReaderResolve.getPageSum() - 1) {
                 mReaderResolve.setPageIndex(pageIndex + 1);
 
+                mReaderResolve.setCharIndex(mReaderResolve.getCurrPageFirstCharIndex());
                 if (mOnReaderWatcherListener != null) {
                     mOnReaderWatcherListener.onPageChanged(mReaderResolve.getPageIndex());
                 }
@@ -445,17 +474,41 @@ public class ReaderView extends View {
             return toNextChapter();
         }
 
+        /**
+         * 跳转到上一章的最后字符位置
+         */
         @Override
         public final TurnStatus toPrevChapter() {
+            return toPrevChapter(ReaderResolve.LAST_INDEX);
+        }
+
+        /**
+         * 跳转到上一章的指定字符位置
+         *
+         * @param charIndex 指定字符索引
+         */
+        public final TurnStatus toPrevChapter(int charIndex) {
             int chapterIndex = mReaderResolve.getChapterIndex();
             if (chapterIndex == 0) {
                 return result(TurnStatus.NO_PREV_CHAPTER);
             }
-            return toSpecifiedChapter(chapterIndex - 1, ReaderResolve.LAST_INDEX);
+            return toSpecifiedChapter(chapterIndex - 1, charIndex);
         }
 
+        /**
+         * 跳转到下一章的最后一个
+         */
         @Override
         public final TurnStatus toNextChapter() {
+            return toNextChapter(ReaderResolve.FIRST_INDEX);
+        }
+
+        /**
+         * 跳转到下一章的指定字符位置
+         *
+         * @param charIndex 指定字符
+         */
+        public final TurnStatus toNextChapter(int charIndex) {
             int chapterIndex = mReaderResolve.getChapterIndex();
             if (chapterIndex >= mReaderResolve.getChapterSum() - 1) {
                 return result(TurnStatus.NO_NEXT_CHAPTER);
@@ -571,7 +624,7 @@ public class ReaderView extends View {
             return mReaderResolve;
         }
 
-        public void setReaderResolve(ReaderResolve readerResolve) {
+        public void setCustomReaderResolve(ReaderResolve readerResolve) {
             mReaderResolve = readerResolve;
             mReaderResolve.calculateChapterParameter();
             this.mReaderView.invalidateCurrPage();
@@ -588,6 +641,7 @@ public class ReaderView extends View {
 
             if (mOnReaderWatcherListener != null) {
                 mOnReaderWatcherListener.onChapterChanged(chapterIndex, mReaderResolve.getPageIndex());
+                mOnReaderWatcherListener.onPageChanged(mReaderResolve.getPageIndex());
             }
             //章节发生变化后，缓存前后章节（如果没有缓存的话）
             cacheNearChapter(chapterIndex);
@@ -690,7 +744,7 @@ public class ReaderView extends View {
         public void onAdapterChanged(Adapter oldAdapter, Adapter adapter) {
         }
 
-        public TurnStatus onChanged() {
+        TurnStatus onChanged() {
             Adapter adapter = ReaderManager.this.mReaderView.getAdapter();
 //            ReaderManager.this.mReaderResolve.setArea(ReaderManager.this.mReaderView.getMeasuredWidth(),
 //                    ReaderManager.this.mReaderView.getMeasuredHeight());
@@ -742,6 +796,9 @@ public class ReaderView extends View {
             mReaderResolve.setReaderConfig(readerConfig);
         }
 
+        Paint getBodyTextPaint() {
+            return mReaderResolve.getBodyTextPaint();
+        }
     }
 
     static class AdapterDataObservable extends Observable<DataObserver> {
@@ -768,7 +825,7 @@ public class ReaderView extends View {
     }
 
     //提供一个简单的PageChangedCallback的实现
-    public class SimplePageChangedCallback implements PageChangedCallback {
+    public class SimplePageChangedCallback implements PageChangedCallback, PageDrawingCallback {
 
         @Override
         public void invalidate() {

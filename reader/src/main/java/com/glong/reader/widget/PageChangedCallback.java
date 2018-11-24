@@ -9,21 +9,6 @@ import com.glong.reader.TurnStatus;
 public interface PageChangedCallback {
 
     /**
-     * 刷新ReaderView时调用
-     */
-    void invalidate();
-
-    /**
-     * 画当前页的时候调用 {@link ReaderView#mCurrPageCanvas}
-     */
-    void drawCurrPage();
-
-    /**
-     * 画下一页的时候调用 {@link ReaderView#mNextPageCanvas}
-     */
-    void drawNextPage();
-
-    /**
      * 获取上一页的时候调用
      *
      * @return 获取结果

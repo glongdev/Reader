@@ -238,23 +238,23 @@ public class EffectOfRealOneWay extends Effect {
 
                         float cornerX;
                         if (dxFromDown > 0) {// 上一页
-                            mPageChangedCallback.drawNextPage();
+                            mPageDrawingCallback.drawNextPage();
                             mTurnStatus = mPageChangedCallback.toPrevPage();
                             if (mTurnStatus == TurnStatus.LOAD_SUCCESS) {
                                 abortAnimation();
-                                mPageChangedCallback.drawCurrPage();
+                                mPageDrawingCallback.drawCurrPage();
                             }
                             calcCornerXY(mEffectWidth, mEffectHeight);
 
                         } else {
-                            mPageChangedCallback.drawCurrPage();
+                            mPageDrawingCallback.drawCurrPage();
                             cornerX = mEffectWidth;
                             mTurnStatus = mPageChangedCallback.toNextPage();
                             if (mTurnStatus == TurnStatus.LOAD_SUCCESS) {
                                 abortAnimation();
-                                mPageChangedCallback.drawNextPage();
+                                mPageDrawingCallback.drawNextPage();
                             }
-                            mPageChangedCallback.invalidate();
+                            mPageDrawingCallback.invalidate();
 
                             if (mStartMoveY >= mEffectHeight / 3 && mStartMoveY <= mEffectHeight * 2 / 3) {
                                 calcCornerXY(cornerX, mEffectHeight);
@@ -276,7 +276,7 @@ public class EffectOfRealOneWay extends Effect {
                     }
 
                     calcBezierPoints();
-                    mPageChangedCallback.invalidate();
+                    mPageDrawingCallback.invalidate();
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -285,18 +285,18 @@ public class EffectOfRealOneWay extends Effect {
                 long upTime = System.currentTimeMillis();
                 // 单击事件,只要时单击事件都滑向下一页
                 if (mTurnStatus == TurnStatus.IDLE && upTime - mDownTime <= mLongClickTime) {
-                    mPageChangedCallback.drawCurrPage();
+                    mPageDrawingCallback.drawCurrPage();
 //                    if (x > mEffectWidth / 2) {
                     //向左滑 --> 下一页
                     if (mPageChangedCallback.toNextPage() == TurnStatus.LOAD_SUCCESS) {
                         Log.d(getClass().getSimpleName(), "start scroll to next page!");
-                        mPageChangedCallback.drawNextPage();
+                        mPageDrawingCallback.drawNextPage();
 
                         calcCornerXY(mEffectWidth, mEffectHeight);
                         mTouch.y = mEffectHeight;
                         mTouch.x = x;
                         startAnimation();
-                        mPageChangedCallback.invalidate();
+                        mPageDrawingCallback.invalidate();
                     }
 //                    } else {
 //                        // 向右滑 --> 上一页
@@ -329,7 +329,7 @@ public class EffectOfRealOneWay extends Effect {
                         } else {
                             startAnimation();
                         }
-                        mPageChangedCallback.invalidate();
+                        mPageDrawingCallback.invalidate();
                     } else {
                         // 向右滑 --> 上一页
                         // 分两种情况，顺利到达上一页 and 取消到上一页
@@ -339,7 +339,7 @@ public class EffectOfRealOneWay extends Effect {
                         } else {
                             mScroller.startScroll((int) mTouch.x, mEffectHeight, (int) (mEffectWidth - mTouch.x), 0, ANIM_DURATION / 2);
                         }
-                        mPageChangedCallback.invalidate();
+                        mPageDrawingCallback.invalidate();
                     }
                 }
                 break;
@@ -727,7 +727,7 @@ public class EffectOfRealOneWay extends Effect {
             mTouch.x = x;
             mTouch.y = y;
             calcBezierPoints();
-            mPageChangedCallback.invalidate();
+            mPageDrawingCallback.invalidate();
         }
     }
 
