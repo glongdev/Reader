@@ -22,12 +22,6 @@ public class LocalServer {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    onResponseCallback.onError(e);
-                }
                 List<ChapterItemBean> chapters = new ArrayList<>();
                 while (chapters.size() < 100) {
                     ChapterItemBean chapterItemBean = new ChapterItemBean();
@@ -46,11 +40,6 @@ public class LocalServer {
      * @return 章节内容
      */
     public static ChapterContentBean syncDownloadContent(ChapterItemBean chapterItemBean) {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         ChapterContentBean chapterContentBean = new ChapterContentBean();
         chapterContentBean.setChapterId(chapterItemBean.getChapterId());
         chapterContentBean.setChapterName(chapterItemBean.getChapterName());

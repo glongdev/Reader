@@ -4,12 +4,15 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
+import com.glong.reader.TurnStatus;
 import com.glong.reader.widget.EffectOfCover;
 import com.glong.reader.widget.EffectOfNon;
 import com.glong.reader.widget.EffectOfRealBothWay;
 import com.glong.reader.widget.EffectOfRealOneWay;
 import com.glong.reader.widget.EffectOfSlide;
+import com.glong.reader.widget.PageChangedCallback;
 import com.glong.reader.widget.ReaderView;
 import com.glong.sample.R;
 import com.glong.sample.entry.ChapterContentBean;
@@ -89,7 +92,7 @@ public class NormalReaderActivity extends AppCompatActivity implements View.OnCl
         final String userId = "123";
         mReaderView = findViewById(R.id.normal_reader_view);
 
-        ReaderView.ReaderManager readerManager = new ReaderView.ReaderManager();
+        final ReaderView.ReaderManager readerManager = new ReaderView.ReaderManager();
         mReaderView.setReaderManager(readerManager);
 
         mAdapter = new ReaderView.Adapter<ChapterItemBean, ChapterContentBean>() {
@@ -119,6 +122,26 @@ public class NormalReaderActivity extends AppCompatActivity implements View.OnCl
         };
 
         mReaderView.setAdapter(mAdapter);
+
+        mReaderView.setPageChangedCallback(new PageChangedCallback() {
+            @Override
+            public TurnStatus toPrevPage() {
+                TurnStatus turnStatus = readerManager.toPrevPage();
+                if (turnStatus == TurnStatus.NO_PREV_CHAPTER) {
+                    Toast.makeText(NormalReaderActivity.this, "没有上一页啦", Toast.LENGTH_SHORT).show();
+                }
+                return turnStatus;
+            }
+
+            @Override
+            public TurnStatus toNextPage() {
+                TurnStatus turnStatus = readerManager.toNextPage();
+                if (turnStatus == TurnStatus.NO_NEXT_CHAPTER) {
+                    Toast.makeText(NormalReaderActivity.this, "没有下一页啦", Toast.LENGTH_SHORT).show();
+                }
+                return turnStatus;
+            }
+        });
     }
 
     private void initData() {
