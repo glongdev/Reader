@@ -167,7 +167,7 @@ Reader就是基于这种业务逻辑提供了如下功能：
 
   运行一下我们的项目，我们已经迫不及待的想看一下效果了
 
-  ![](C:/Users/glong/Documents/Reader/images/video2gif_20181123_183236.gif)
+  ![](/images/video2gif_20181123_183236.gif)
 
 大家常用RecyclerView，可以把ReaderView当作RecyclerView，把ReaderManager当作LayoutManager，把ReaderView#Adapter当作RecyclerView#Adapter，是不是简单了很多。事实上，他们的用法以及功能划分也及其相似。
 
@@ -241,7 +241,7 @@ Reader就是基于这种业务逻辑提供了如下功能：
 
 “可不可以自定义翻页动效？”
 
-![](C:/Users/glong/Documents/Reader/images/QQ%E6%88%AA%E5%9B%BE20181123224610.png)
+![](images/QQ%E6%88%AA%E5%9B%BE20181123224610.png)
 
 of course！只需要继承自Effect即可；
 
