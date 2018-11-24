@@ -1,6 +1,9 @@
 # Reader
 > A reader that is easy to integrate and extend.
+
+
 先看拥有部分功能的效果图
+
 ![](images/20181123_204344.gif)
 #### 一款小说类APP阅读器的业务逻辑
 
