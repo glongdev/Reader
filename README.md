@@ -332,7 +332,7 @@ mReaderView.invalidateBothPage();
 
 按照惯例线上效果图：
 
-![](C:/Users/glong/Documents/Reader/images/20181123_204344.gif)
+![](images/20181123_204344.gif)
 
 
 
