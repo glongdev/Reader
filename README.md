@@ -1,6 +1,8 @@
 # Reader
 > A reader that is easy to integrate and extend.
 
+ **本篇文章已授权微信公众号 guolin_blog （郭霖）独家发布**
+
 
 先看拥有部分功能的效果图
 
