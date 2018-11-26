@@ -2,6 +2,8 @@
 > A reader that is easy to integrate and extend.
 
 
+![](images/微信图片_20181126135424.jpg)
+
 同步[我的博客地址](https://www.jianshu.com/p/15aad84c11c7)，并且
  **本篇文章已授权微信公众号 guolin_blog （郭霖）独家发布**
 
