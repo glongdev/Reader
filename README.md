@@ -1,6 +1,14 @@
 # Reader
 > A reader that is easy to integrate and extend.
 
+
+同步[我的博客地址](https://www.jianshu.com/p/15aad84c11c7)，并且
+ **本篇文章已授权微信公众号 guolin_blog （郭霖）独家发布**
+
+
+先看拥有部分功能的效果图
+
+![](images/20181123_204344.gif)
 #### 一款小说类APP阅读器的业务逻辑
 
 首先我们需要知道一款小说类app加载阅读器的业务流程。大致的流程是：
@@ -167,7 +175,7 @@ Reader就是基于这种业务逻辑提供了如下功能：
 
   运行一下我们的项目，我们已经迫不及待的想看一下效果了
 
-  ![](C:/Users/glong/Documents/Reader/images/video2gif_20181123_183236.gif)
+  ![](/images/video2gif_20181123_183236.gif)
 
 大家常用RecyclerView，可以把ReaderView当作RecyclerView，把ReaderManager当作LayoutManager，把ReaderView#Adapter当作RecyclerView#Adapter，是不是简单了很多。事实上，他们的用法以及功能划分也及其相似。
 
@@ -241,7 +249,7 @@ Reader就是基于这种业务逻辑提供了如下功能：
 
 “可不可以自定义翻页动效？”
 
-![](C:/Users/glong/Documents/Reader/images/QQ%E6%88%AA%E5%9B%BE20181123224610.png)
+![](images/QQ%E6%88%AA%E5%9B%BE20181123224610.png)
 
 of course！只需要继承自Effect即可；
 
@@ -287,7 +295,7 @@ of course！只需要继承自Effect即可；
 
 の，这个还真不太好解释，因为这里的上一页/下一页和我们理解的上一页/下一页并不太一样，就好比我们看到的3D效果其实也是2D实现的，都是骗眼睛的。当翻向下一页的时候我们看到的是下一页，当翻向上一页的时候我们看到的其实还是下一页。有点绕，这其实跟软件的设计有关，翻页设计时只有当前页和下一页，没有上一页（节省内存），那翻向上一页怎么办？这里的上一页也就是下一页。
 
-![](C:/Users/glong/Documents/Reader/images/QQ%E6%88%AA%E5%9B%BE20181123225319.png)
+![](/images/QQ%E6%88%AA%E5%9B%BE20181123225319.png)
 
 总之，只有理解原理后才建议调用`invalidateCurrPage()`和`invalidateNextPage()`。否则就调用`invalidateBothPage()`确保显示没有问题。
 
@@ -332,7 +340,7 @@ mReaderView.invalidateBothPage();
 
 按照惯例线上效果图：
 
-![](C:/Users/glong/Documents/Reader/images/20181123_204344.gif)
+![](images/20181123_204344.gif)
 
 
 
