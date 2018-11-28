@@ -12,12 +12,23 @@ import java.util.Set;
  */
 public class TextBreakUtils {
 
-    public static Set<String> sParagraph = new HashSet<>();
+    public static Set<String> sParagraph = new HashSet<>();//换行符
+    public static Set<String> sRetract = new HashSet<>();// 缩进符
 
     static {
         sParagraph.add("<br><br>");
         sParagraph.add("<br>");
         sParagraph.add("</p>");
+
+        sRetract.add("　");
+    }
+
+    public static boolean isStartWithRetract(String src) {
+        if (src == null) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -32,11 +43,10 @@ public class TextBreakUtils {
      * TODO
      * --------------------
      */
-    public static BreakResult breakText(char[] cs, float measureWidth, float textPadding, Paint paint) {
-        if (cs == null || cs.length == 0) {
-            return null;
-        }
-
+    public static BreakResult breakText(int fromIndex, char[] cs, float measureWidth, float textPadding, Paint paint) {
+//        if (cs == null || cs.length == 0) {
+//            return null;
+//        }
         BreakResult breakResult = new BreakResult();
         breakResult.showChars = new ArrayList<>();
         float width = 0;
@@ -74,6 +84,7 @@ public class TextBreakUtils {
             ShowChar showChar = new ShowChar();
             showChar.charData = cs[i];
             showChar.charWidth = charWidth;
+            showChar.indexInChapter = fromIndex + i;
             breakResult.showChars.add(showChar);
             width += charWidth + textPadding;
         }
@@ -82,11 +93,8 @@ public class TextBreakUtils {
         return breakResult;
     }
 
-    public static BreakResult breakText(String text, float measureWidth, float textPadding, Paint paint) {
-        if (android.text.TextUtils.isEmpty(text)) {
-            return null;
-        }
-        return breakText(text.toCharArray(), measureWidth, textPadding, paint);
+    public static BreakResult breakText(int fromIndex, String text, float measureWidth, float textPadding, Paint paint) {
+        return breakText(fromIndex, text.toCharArray(), measureWidth, textPadding, paint);
     }
 
     /**
@@ -117,27 +125,34 @@ public class TextBreakUtils {
         String textData = src;
         List<ShowLine> showLines = new ArrayList<>();
 
+        int lineIndex = 0;
         while (textData.length() > 0) {
-            BreakResult breakResult = breakText(textData, measureWidth, textPadding, paint);
+            BreakResult breakResult = breakText(src.length() - textData.length(), textData, measureWidth, textPadding, paint);
             ShowLine showLine = new ShowLine();
             showLine.charsData = breakResult.showChars;
+            showLine.isFullLine = breakResult.isFullLine;
+            showLine.endWithWrapMark = breakResult.endWithWrapMark;
+
             if (showLine.getLineFirstIndexInChapter() != -1) {
+                showLine.indexInChapter = lineIndex;
                 showLines.add(showLine);
+                lineIndex++;
             }
             textData = textData.substring(breakResult.chartNums);
         }
 
         //给每个字符添加当前章节中的索引（即所有字符串中的索引）
-        int indexCharInChapter = 0;
-        int indexLineInChapter = 0;
-        for (ShowLine everyLine : showLines) {
-            everyLine.indexInChapter = indexLineInChapter;
-            indexLineInChapter++;
-            for (ShowChar everyChar : everyLine.charsData) {
-                everyChar.indexInChapter = indexCharInChapter;
-                indexCharInChapter++;
-            }
-        }
+        // 11.28 将添加索引的计算放在了BreakResult的获取时。
+//        int indexCharInChapter = 0;
+//        int indexLineInChapter = 0;
+//        for (ShowLine everyLine : showLines) {
+//            everyLine.indexInChapter = indexLineInChapter;
+//            indexLineInChapter++;
+//            for (ShowChar everyChar : everyLine.charsData) {
+//                everyChar.indexInChapter = indexCharInChapter;
+//                indexCharInChapter++;
+//            }
+//        }
         return showLines;
     }
 }

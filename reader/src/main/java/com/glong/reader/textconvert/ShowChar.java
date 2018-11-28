@@ -14,7 +14,7 @@ public class ShowChar {
     /**
      * 当前字符是否被选中
      */
-    public Boolean selected = false;
+    public boolean selected = false;
 
     /**
      * 字符宽度

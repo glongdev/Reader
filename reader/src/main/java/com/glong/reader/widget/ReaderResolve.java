@@ -393,13 +393,32 @@ public class ReaderResolve {
      * @param canvas
      */
     protected void drawLineText(Canvas canvas, ShowLine showLine, float x, float y, float textHeight) {
-        canvas.drawText(showLine.getLineData(), x, y, mMainBodyPaint);
+        int paddingLeft = mReaderConfig.getPadding()[0];
+        int paddingRight = mReaderConfig.getPadding()[3];
+
         float rightPosition;
         float bottomPosition = y + mMainBodyPaint.getFontMetrics().descent;
         float topPosition = bottomPosition - textHeight - mMainBodyPaint.getFontMetrics().descent;
-        for (ShowChar showChar : showLine.charsData) {
-            rightPosition = x + showChar.charWidth;
-            showChar.rectF = new RectF(x, topPosition, rightPosition, bottomPosition);
+
+        // 满一行并且不是以换行符号结束，为了排版整齐，挨个画字符
+        if (showLine.isFullLine && !showLine.endWithWrapMark) {
+            List<ShowChar> showChars = showLine.charsData;
+            int charSum = showChars.size();
+            float start = x;
+            float landscapeSpace = (mAreaWidth - paddingLeft - paddingRight - showChars.get(charSum - 1).charWidth) * 1f / (charSum - 1);
+            for (ShowChar showChar : showChars) {
+                canvas.drawText(String.valueOf(showChar.charData), start, y, mMainBodyPaint);
+                showChar.rectF = new RectF(start, topPosition, start + showChar.charWidth, bottomPosition);
+                start += landscapeSpace;
+            }
+        } else {
+            canvas.drawText(showLine.getLineData(), x, y, mMainBodyPaint);
+
+            // 计算每个字符的位置
+            for (ShowChar showChar : showLine.charsData) {
+                rightPosition = x + showChar.charWidth;
+                showChar.rectF = new RectF(x, topPosition, rightPosition, bottomPosition);
+            }
         }
     }
 

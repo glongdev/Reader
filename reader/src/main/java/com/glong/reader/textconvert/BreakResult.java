@@ -15,19 +15,19 @@ public class BreakResult {
     /**
      * 是否满一行了
      */
-    public Boolean isFullLine;
+    public boolean isFullLine;
 
     /**
-     * 是否以<br><br>标志结束的
+     * 是否以分段符标志结束的
      */
-    public Boolean endWithWrapMark;
+    public boolean endWithWrapMark;
 
     /**
      * 测量了的字符数据
      */
     public List<ShowChar> showChars = null;
 
-    public Boolean hasData() {
+    public boolean hasData() {
         return showChars != null && showChars.size() > 0;
     }
 }

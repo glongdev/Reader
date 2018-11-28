@@ -10,9 +10,19 @@ public class ShowLine {
     public List<ShowChar> charsData;
 
     /**
-     * 当前行在当前章节的索引
+     * 当前行在当前章节所有行中的索引
      */
     public int indexInChapter;
+
+    /**
+     * 是否满一行了
+     */
+    public boolean isFullLine;
+
+    /**
+     * 是否以分段符标志结束的
+     */
+    public boolean endWithWrapMark;
 
     public String getLineData() {
         String lineData = "";
