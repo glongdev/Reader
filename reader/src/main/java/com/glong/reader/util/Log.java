@@ -6,7 +6,7 @@ package com.glong.reader.util;
  */
 public class Log {
 
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 
     public static int v(String tag, String msg) {
         if (DEBUG) {

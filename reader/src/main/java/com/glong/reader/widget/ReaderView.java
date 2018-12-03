@@ -64,6 +64,7 @@ public class ReaderView extends View {
     private PageDrawingCallback mPageDrawingCallback;
 
     private AdapterDataObserver mObserver;
+    private boolean isCanTouch = true;
 
     public ReaderView(@NonNull Context context) {
         this(context, null);
@@ -116,8 +117,10 @@ public class ReaderView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (mEffect.onTouchEvent(event)) {
-            return true;
+        if (isCanTouch) {
+            if (mEffect.onTouchEvent(event)) {
+                return true;
+            }
         }
         return super.onTouchEvent(event);
     }
@@ -340,6 +343,14 @@ public class ReaderView extends View {
     public void setPageDrawingCallback(PageDrawingCallback pageDrawingCallback) {
         mPageDrawingCallback = pageDrawingCallback;
         mEffect.setPageDrawingCallback(pageDrawingCallback);
+    }
+
+    public boolean isCanTouch() {
+        return isCanTouch;
+    }
+
+    public void setCanTouch(boolean canTouch) {
+        isCanTouch = canTouch;
     }
 
     /**
