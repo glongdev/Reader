@@ -10,7 +10,14 @@
 
 先看拥有部分功能的效果图
 
-![](images/20181123_204344.gif)
+<figure class="third">
+    <img src="images/20181123_204344.gif" width="270" height="480"/>
+    <img src="images/non.png" width="100" />
+    <img src="images/菜单.gif" width="270" height="480"/>
+</figure>
+
+
+
 #### 一款小说类APP阅读器的业务逻辑
 
 首先我们需要知道一款小说类app加载阅读器的业务流程。大致的流程是：
