@@ -13,4 +13,9 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="OverFlowMenuTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <!-- 设置Menu窗口不覆盖Toolbar视图 -->
+        <item name="overlapAnchor">false</item>
+    </style>
+
 </resources>

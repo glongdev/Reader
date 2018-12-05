@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/setting_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/qb_px_770"
+        android:layout_gravity="bottom"
+        android:background="@color/bg_reader_setting"
+        android:clickable="true"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/qb_px_120"
+            android:layout_marginTop="@dimen/qb_px_25"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="@dimen/qb_px_185"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="亮度"
+                android:textColor="@color/setting_color"
+                android:textSize="@dimen/qb_px_55" />
+
+            <SeekBar
+                android:id="@+id/light_seek_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/qb_px_120"
+            android:layout_marginTop="@dimen/qb_px_25"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="@dimen/qb_px_185"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="背景"
+                android:textColor="@color/setting_color"
+                android:textSize="@dimen/qb_px_55" />
+
+            <TextView
+                android:id="@+id/reader_bg_0"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/qb_px_10"
+                android:layout_weight="1"
+                android:background="@color/reader_bg_0" />
+
+            <TextView
+                android:id="@+id/reader_bg_1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/qb_px_10"
+                android:layout_weight="1"
+                android:background="@color/reader_bg_1" />
+
+            <TextView
+                android:id="@+id/reader_bg_2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/qb_px_10"
+                android:layout_weight="1"
+                android:background="@color/reader_bg_2" />
+
+            <TextView
+                android:id="@+id/reader_bg_3"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/qb_px_10"
+                android:layout_weight="1"
+                android:background="@color/reader_bg_3" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/qb_px_120"
+            android:layout_marginTop="@dimen/qb_px_25"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="@dimen/qb_px_185"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="字号"
+                android:textColor="@color/setting_color"
+                android:textSize="@dimen/qb_px_55" />
+
+            <SeekBar
+                android:id="@+id/text_size_seek_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/qb_px_120"
+            android:layout_marginTop="@dimen/qb_px_25"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="@dimen/qb_px_185"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="间距"
+                android:textColor="@color/setting_color"
+                android:textSize="@dimen/qb_px_55" />
+
+            <SeekBar
+                android:id="@+id/text_space_seek_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/qb_px_120"
+            android:layout_marginTop="@dimen/qb_px_25"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="@dimen/qb_px_185"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="翻页"
+                android:textColor="@color/setting_color"
+                android:textSize="@dimen/qb_px_55" />
+
+            <TextView
+                android:id="@+id/effect_real_one_way"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/qb_px_10"
+                android:layout_weight="1"
+                android:background="@drawable/text_background"
+                android:gravity="center"
+                android:text="仿真1" />
+
+            <TextView
+                android:id="@+id/effect_real_both_way"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/qb_px_10"
+                android:layout_weight="1"
+                android:background="@drawable/text_background"
+                android:gravity="center"
+                android:text="仿真2" />
+
+            <TextView
+                android:id="@+id/effect_cover"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/qb_px_10"
+                android:layout_weight="1"
+                android:background="@drawable/text_background"
+                android:gravity="center"
+                android:text="覆盖" />
+
+            <TextView
+                android:id="@+id/effect_slide"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/qb_px_10"
+                android:layout_weight="1"
+                android:background="@drawable/text_background"
+                android:gravity="center"
+                android:text="滑动" />
+
+            <TextView
+                android:id="@+id/effect_non"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/qb_px_10"
+                android:layout_weight="1"
+                android:background="@drawable/text_background"
+                android:gravity="center"
+                android:text="无" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</merge>

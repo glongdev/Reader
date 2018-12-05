@@ -4,4 +4,11 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+
+    <string name="share">分享</string>
+    <string name="delete_cache">删除缓存</string>
+    <string name="catalogue">目录</string>
+    <string name="setting">设置</string>
+    <string name="day_night">日/夜</string>
+    <string name="comment">评论</string>
 </resources>

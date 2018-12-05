@@ -9,4 +9,7 @@
     <color name="reader_bg_1">#d8c9aa</color>
     <color name="reader_bg_2">#cce8cf</color>
     <color name="reader_bg_3">#b69b94</color>
+
+    <color name="bg_reader_setting">#FE282828</color>
+    <color name="setting_color">#ffffff</color>
 </resources>

@@ -45,13 +45,15 @@ public class LocalServer {
         chapterContentBean.setChapterName(chapterItemBean.getChapterName());
         StringBuilder contentBuilder = new StringBuilder();
         while (contentBuilder.length() < 1000) {
-            contentBuilder.append(String.valueOf(chapterItemBean.getChapterName() + "</p>" +
-                    "　　</p>" +
-                    "　　世界上一成不变的东西，只有“任何事物都是在不断变化的”这条真理。</p> —— 斯里兰卡<br><br>" +
-                    "　　</p>" +
-                    "　　我需要三件东西：爱情友谊和图书。然而这三者之间何其相通！炽热的爱情可以充实图书的内容，图书又是人们最忠实的朋友。</p> —— 蒙田<br><br>" +
-                    "　　</p>" +
-                    "　　生活有度，人生添寿。</p> —— 书摘<br><br>"));
+//            contentBuilder.append(String.valueOf(chapterItemBean.getChapterName() + "</p>" +
+//                    "　　</p>" +
+//                    "　　世界上一成不变的东西，只有“任何事物都是在不断变化的”这条真理。</p> —— 斯里兰卡<br><br>" +
+//                    "　　</p>" +
+//                    "　　我需要三件东西：爱情友谊和图书。然而这三者之间何其相通！炽热的爱情可以充实图书的内容，图书又是人们最忠实的朋友。</p> —— 蒙田<br><br>" +
+//                    "　　</p>" +
+//                    "　　生活有度，人生添寿。</p> —— 书摘<br><br>"));
+            contentBuilder.append(LocalConstant.CONTENT);
+
         }
         chapterContentBean.setChapterContent(contentBuilder.toString());
         return chapterContentBean;

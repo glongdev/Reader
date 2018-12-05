@@ -1,5 +1,121 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-</FrameLayout>
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/tool_bar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/bg_reader_setting"
+        android:clickable="true"
+        android:focusable="true"
+        app:theme="@style/OverFlowMenuTheme"
+        app:title="@string/app_name">
+
+    </android.support.v7.widget.Toolbar>
+
+    <FrameLayout
+        android:id="@+id/bottom_menu"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/qb_px_300"
+        android:layout_gravity="bottom"
+        android:background="@color/bg_reader_setting"
+        android:clickable="true"
+        android:focusable="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/qb_px_100"
+            android:layout_marginTop="@dimen/qb_px_40"
+            android:gravity="top"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/text_prev_chapter"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/qb_px_50"
+                android:gravity="center"
+                android:text="上一章"
+                android:textColor="@color/setting_color"
+                android:textSize="@dimen/qb_px_50" />
+
+            <SeekBar
+                android:id="@+id/chapter_seek_bar"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+            <TextView
+                android:id="@+id/text_next_chapter"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/qb_px_50"
+                android:gravity="center"
+                android:text="下一章"
+                android:textColor="@color/setting_color"
+                android:textSize="@dimen/qb_px_50" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="horizontal"
+            android:paddingBottom="@dimen/qb_px_20">
+
+            <TextView
+                android:id="@+id/reader_catalogue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/ic_read_categue_night"
+                android:drawablePadding="@dimen/qb_px_10"
+                android:gravity="center"
+                android:text="@string/catalogue"
+                android:textColor="@color/setting_color"
+                android:textSize="@dimen/qb_px_45" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/ic_read_night"
+                android:drawablePadding="@dimen/qb_px_10"
+                android:gravity="center"
+                android:text="@string/day_night"
+                android:textColor="@color/setting_color"
+                android:textSize="@dimen/qb_px_45" />
+
+            <TextView
+                android:id="@+id/setting"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/ic_read_setting_night"
+                android:drawablePadding="@dimen/qb_px_10"
+                android:gravity="center"
+                android:text="@string/setting"
+                android:textColor="@color/setting_color"
+                android:textSize="@dimen/qb_px_45" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/ic_read_comment_night"
+                android:drawablePadding="@dimen/qb_px_10"
+                android:gravity="center"
+                android:text="@string/comment"
+                android:textColor="@color/setting_color"
+                android:textSize="@dimen/qb_px_45" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</merge>
