@@ -111,7 +111,7 @@ public class TextBreakUtils {
         Paint.FontMetrics fm = paint.getFontMetrics();
         float textHeight = fm.bottom - fm.top;
         float heightEveryLine = textHeight + lineSpace;
-        return (int) ((measureHeight - lineSpace) / heightEveryLine);
+        return (int) (measureHeight / heightEveryLine);
     }
 
     /**

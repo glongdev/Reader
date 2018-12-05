@@ -20,7 +20,7 @@ import com.glong.reader.cache.DiskCache;
 import com.glong.reader.config.ColorsConfig;
 import com.glong.reader.config.ReaderConfig;
 import com.glong.reader.textconvert.TextBreakUtils;
-import com.glong.reader.util.Log;
+import com.glong.reader.util.DLog;
 import com.glong.reader.util.NetUtil;
 import com.glong.reader.util.Request;
 
@@ -380,7 +380,7 @@ public class ReaderView extends View {
         private List<K> mChapterList;
 
         public void setChapterList(List<K> chapters) {
-            Log.d(this.TAG, "setChapterList ,listSize : " + chapters.size());
+            DLog.d(this.TAG, "setChapterList ,listSize : " + chapters.size());
             this.mChapterList = chapters;
         }
 
@@ -403,7 +403,7 @@ public class ReaderView extends View {
         }
 
         public void notifyDataSetChanged() {
-            Log.d(Adapter.TAG, "notifyDataSetChanged");
+            DLog.d(Adapter.TAG, "notifyDataSetChanged");
             mObservable.notifyChanged();
         }
 
@@ -535,7 +535,7 @@ public class ReaderView extends View {
                 return result(TurnStatus.LOAD_FAILURE);
             }
             if (this.mDownloadingQueue.contains(chapterIndex)) {
-                if (Log.DEBUG)
+                if (DLog.DEBUG)
                     Toast.makeText(mReaderView.getContext(), "正在下载", Toast.LENGTH_SHORT).show();
                 mDownloadingQueue.put(chapterIndex, true);// 正在下载的可能是缓存在下载，所以这里必须设置为true
                 return result(TurnStatus.DOWNLOADING);
@@ -546,7 +546,7 @@ public class ReaderView extends View {
             ParameterizedType parameterizedType = (ParameterizedType) adapter.getClass().getGenericSuperclass();
             Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 //            for (Type actualTypeArgument : actualTypeArguments) {
-//                Log.d(TAG, "type :" + actualTypeArgument);
+//                DLog.d(TAG, "type :" + actualTypeArgument);
 //            }
 
             Object cache = mCache.get(adapter.obtainCacheKey(chapterItem), actualTypeArguments[1]);
@@ -609,7 +609,7 @@ public class ReaderView extends View {
             BatteryManager batteryManager = (BatteryManager) mReaderView.getContext().getSystemService(BATTERY_SERVICE);
             if (batteryManager != null) {
                 int battery = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
-                Log.d(TAG, "battery:" + battery);
+                DLog.d(TAG, "battery:" + battery);
                 mReaderResolve.setBattery(battery);
             }
             mReaderResolve.drawPage(canvas);
@@ -695,7 +695,7 @@ public class ReaderView extends View {
             mFixedThreadPool.execute(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d(ReaderManager.TAG, " start download chapterIndex:" + chapterIndex);
+                    DLog.d(ReaderManager.TAG, " start download chapterIndex:" + chapterIndex);
                     if (showAfterDownload)
                         ReaderManager.this.toastInAsync("开始下载");
 
@@ -713,7 +713,7 @@ public class ReaderView extends View {
                     }
 
                     if (downLoad != null) {
-                        Log.d(ReaderManager.TAG, "download " + chapterIndex
+                        DLog.d(ReaderManager.TAG, "download " + chapterIndex
                                 + " success,content:" + adapter.obtainChapterContent(downLoad));
 
                         if (mDownloadingQueue.get(chapterIndex)) {
@@ -789,7 +789,7 @@ public class ReaderView extends View {
         }
 
         private void toastInAsync(final String msg) {
-            if (Log.DEBUG)
+            if (DLog.DEBUG)
                 ReaderManager.this.mReaderView.post(new Runnable() {
                     @Override
                     public void run() {

@@ -14,7 +14,7 @@ import com.glong.reader.config.ReaderConfig;
 import com.glong.reader.textconvert.ShowChar;
 import com.glong.reader.textconvert.ShowLine;
 import com.glong.reader.textconvert.TextBreakUtils;
-import com.glong.reader.util.Log;
+import com.glong.reader.util.DLog;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -157,7 +157,7 @@ public class ReaderResolve {
      * 根据字符索引计算页码
      */
     private void calculatePageIndex() {
-        Log.d(TAG, " start calculatePageIndex --- charIndex: " + mCharIndex + " showLines.size == " + mShowLines.size());
+        DLog.d(TAG, " start calculatePageIndex --- charIndex: " + mCharIndex + " showLines.size == " + mShowLines.size());
         if (mCharIndex == FIRST_INDEX) {
             mPageIndex = 0;
         } else if (mCharIndex == LAST_INDEX) {
@@ -193,11 +193,11 @@ public class ReaderResolve {
                 mPageIndex = (lineIndex - mLineNumPerPageInFirstPage) / mLineNumPerPageWithoutFirstPage + 1;
             }
         }
-        Log.d(TAG, "pageIndex : " + mPageIndex);
+        DLog.d(TAG, "pageIndex : " + mPageIndex);
     }
 
     public void drawPage(Canvas canvas) {
-//        Log.d(TAG, "start drawPage,title:" + mTitle + " ,content:" + mContent);
+//        DLog.d(TAG, "start drawPage,title:" + mTitle + " ,content:" + mContent);
         drawBackground(canvas);
         drawMarginArea(canvas);
         if (mTitle != null) {
@@ -311,7 +311,7 @@ public class ReaderResolve {
      * @param marginPaint Paint
      */
     protected void drawTime(Canvas canvas, String time, int x, float y, Paint marginPaint) {
-        Log.d(TAG, "drawTime, x:" + x + " ,y:" + y);
+        DLog.d(TAG, "drawTime, x:" + x + " ,y:" + y);
         canvas.drawText(time, x, y, marginPaint);
     }
 
@@ -494,12 +494,12 @@ public class ReaderResolve {
     }
 
     public void setCharIndex(int charIndex) {
-        Log.d(TAG, "charIndex change! oldCharIndex:" + mCharIndex + " ,charIndex:" + charIndex);
+        DLog.d(TAG, "charIndex change! oldCharIndex:" + mCharIndex + " ,charIndex:" + charIndex);
         mCharIndex = charIndex;
     }
 
     public void setArea(int areaWidth, int areaHeight) {
-        Log.d(TAG, "areaWidth:" + areaWidth + ",areaHeight:" + areaHeight);
+        DLog.d(TAG, "areaWidth:" + areaWidth + ",areaHeight:" + areaHeight);
         this.mAreaWidth = areaWidth;
         this.mAreaHeight = areaHeight;
         calculateChapterParameter();

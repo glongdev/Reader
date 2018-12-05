@@ -4,7 +4,7 @@ package com.glong.reader.util;
  * Created by Garrett on 2018/11/20.
  * contact me krouky@outlook.com
  */
-public class Log {
+public class DLog {
 
     public static final boolean DEBUG = false;
 

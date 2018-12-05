@@ -14,7 +14,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.view.MotionEvent;
 
 import com.glong.reader.TurnStatus;
-import com.glong.reader.util.Log;
+import com.glong.reader.util.DLog;
 
 /**
  * 单向仿真翻页
@@ -190,9 +190,9 @@ public class EffectOfRealOneWay extends Effect {
      * 更新touch y
      */
     private void setUpTouchY(float y) {
-        Log.d(TAG, "setUpTouchY, startMoveY:" + mStartMoveY + " ,mEffectHeight:" + mEffectHeight);
+        DLog.d(TAG, "setUpTouchY, startMoveY:" + mStartMoveY + " ,mEffectHeight:" + mEffectHeight);
         if (mStartMoveY >= mEffectHeight / 3 && mStartMoveY <= mEffectHeight * 2 / 3) {
-            Log.d(TAG, "setUpTouchY, reset");
+            DLog.d(TAG, "setUpTouchY, reset");
             mTouch.y = mEffectHeight;
         } else {
             mTouch.y = y;
@@ -289,7 +289,7 @@ public class EffectOfRealOneWay extends Effect {
 //                    if (x > mEffectWidth / 2) {
                     //向左滑 --> 下一页
                     if (mPageChangedCallback.toNextPage() == TurnStatus.LOAD_SUCCESS) {
-                        Log.d(getClass().getSimpleName(), "start scroll to next page!");
+                        DLog.d(getClass().getSimpleName(), "start scroll to next page!");
                         mPageDrawingCallback.drawNextPage();
 
                         calcCornerXY(mEffectWidth, mEffectHeight);
@@ -319,7 +319,7 @@ public class EffectOfRealOneWay extends Effect {
                     mTouch.x = x;
                     setUpTouchY(y);
 
-                    Log.d(getClass().getSimpleName(), "xVelocity == " + mVelocityTracker.getXVelocity());
+                    DLog.d(getClass().getSimpleName(), "xVelocity == " + mVelocityTracker.getXVelocity());
                     if (mStartMoveX - mDownX <= 0) {
                         // 向左滑 --> 下一页
                         // 分两种情况，顺利到达下一页 and 取消到下一页
@@ -415,7 +415,7 @@ public class EffectOfRealOneWay extends Effect {
                 - mCornerX, mBezierControl2.y - mCornerY));
         backShadowDrawable.setBounds(shadowLeft, (int) mBezierStart1.y, shadowRight,
                 (int) (mDiagonalLength + mBezierStart1.y));
-        Log.d(TAG, "drawNextPage(): degress = " + mDegrees);
+        DLog.d(TAG, "drawNextPage(): degress = " + mDegrees);
 
         canvas.save();
         canvas.clipPath(mPath0);
@@ -442,14 +442,14 @@ public class EffectOfRealOneWay extends Effect {
             degree = Math.PI / 4 - Math.atan2(mTouch.y - mBezierControl1.y, mTouch.x
                     - mBezierControl1.x);
         }
-        Log.d(TAG, "degree = " + degree);
+        DLog.d(TAG, "degree = " + degree);
 
         // 计算阴影顶点的坐标
         //这样计算的原理是：假设阴影边与当前翻起的书页边距离为25px, 在阴影顶点和触摸顶点与x轴垂直
         //的情况下，阴影顶点与触摸顶点的距离则为25 * 1.414，在其他情况下，则要根据其夹角来计算了
         double d1 = (float) 25 * 1.414 * Math.cos(degree);
         double d2 = (float) 25 * 1.414 * Math.sin(degree);
-        Log.d(TAG, "d1 = " + d1 + ",d2 = " + d2);
+        DLog.d(TAG, "d1 = " + d1 + ",d2 = " + d2);
         float x = (float) (mTouch.x + d1);
         float y;
         if (mIsRTandLB) {
@@ -650,7 +650,7 @@ public class EffectOfRealOneWay extends Effect {
          */
         if (mTouch.x > 0 && mTouch.x < mEffectWidth) {
             if (mBezierStart1.x < 0 || mBezierStart1.x > mEffectWidth) {
-                Log.e(TAG, "adjust point again...");
+                DLog.e(TAG, "adjust point again...");
                 if (mBezierStart1.x < 0)
                     mBezierStart1.x = mEffectWidth - mBezierStart1.x;
                 //其实就是重新计算出一个touch点来，使得计算出来的该touch点，对应的贝塞尔曲线起始点mBezierStart1.x >= 0
@@ -764,7 +764,7 @@ public class EffectOfRealOneWay extends Effect {
         } else {
             dy = (int) (1 - mTouch.y); // 防止mTouch.y最终变为0
         }
-        Log.d(TAG, "start anim:" + dx + "," + dy);
+        DLog.d(TAG, "start anim:" + dx + "," + dy);
         mScroller.startScroll((int) mTouch.x, (int) mTouch.y, dx, dy, ANIM_DURATION);
     }
 }

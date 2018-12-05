@@ -7,7 +7,7 @@ import android.graphics.Paint;
 import android.view.MotionEvent;
 
 import com.glong.reader.TurnStatus;
-import com.glong.reader.util.Log;
+import com.glong.reader.util.DLog;
 
 /**
  * Created by Garrett on 2018/11/20.
@@ -69,7 +69,7 @@ public class EffectOfCover extends Effect {
                             mTurnStatus = mPageChangedCallback.toNextPage();
                         }
                         if (mTurnStatus == TurnStatus.LOAD_SUCCESS) {
-                            Log.d(getClass().getSimpleName(), "drawNextPage -- ");
+                            DLog.d(getClass().getSimpleName(), "drawNextPage -- ");
                             mPageDrawingCallback.drawNextPage();
                         }
                     }
@@ -97,7 +97,7 @@ public class EffectOfCover extends Effect {
                     if (x > mEffectWidth / 2) {
                         //向左滑 --> 下一页
                         if (mPageChangedCallback.toNextPage() == TurnStatus.LOAD_SUCCESS) {
-                            Log.d(getClass().getSimpleName(), "start scroll to next page!");
+                            DLog.d(getClass().getSimpleName(), "start scroll to next page!");
                             mPageDrawingCallback.drawNextPage();
                             mScroller.startScroll(0, 0, -mEffectWidth - mShadowWidth, 0, ANIM_DURATION);
                             mPageDrawingCallback.invalidate();
@@ -115,7 +115,7 @@ public class EffectOfCover extends Effect {
                 // 翻页成功，手指抬起来时，处理自动翻页
                 else if (mTurnStatus == TurnStatus.LOAD_SUCCESS) {
                     mVelocityTracker.computeCurrentVelocity(1000);
-                    Log.d(getClass().getSimpleName(), "xVelocity == " + mVelocityTracker.getXVelocity());
+                    DLog.d(getClass().getSimpleName(), "xVelocity == " + mVelocityTracker.getXVelocity());
                     if (mMoveVector <= 0) {
                         // 向左滑 --> 下一页
                         // 分两种情况，顺利到达下一页 and 取消到下一页
