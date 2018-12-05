@@ -55,7 +55,7 @@ public class SettingView extends FrameLayout {
         });
     }
 
-    private void dismiss() {
+    public void dismiss() {
         ObjectAnimator anim = ObjectAnimator.ofFloat(mSettingContainer, "translationY", mSettingContainer.getHeight());
         anim.setDuration(200).start();
         anim.addListener(new AnimatorListenerAdapter() {

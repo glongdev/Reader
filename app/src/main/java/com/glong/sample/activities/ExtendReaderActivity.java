@@ -1,7 +1,12 @@
 package com.glong.sample.activities;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -22,7 +27,8 @@ import com.glong.reader.widget.PageChangedCallback;
 import com.glong.reader.widget.ReaderView;
 import com.glong.sample.R;
 import com.glong.sample.ScreenUtils;
-import com.glong.sample.adpater.MyAdapter;
+import com.glong.sample.adpater.CatalogueAdapter;
+import com.glong.sample.adpater.MyReaderAdapter;
 import com.glong.sample.entry.ChapterContentBean;
 import com.glong.sample.entry.ChapterItemBean;
 import com.glong.sample.localtest.LocalServer;
@@ -43,9 +49,11 @@ public class ExtendReaderActivity extends AppCompatActivity implements View.OnCl
     private MenuView mMenuView;// 菜单View
     private SettingView mSettingView;// 设置View
     private SeekBar mChapterSeekBar;//调节章节的SeekBar
-    private SeekBar mLightSeekBar;// 调节亮度的SeekBar
-    private SeekBar mTextSizeSeekBar;//调节字号的SeekBar
-    private SeekBar mTextSpaceSeekBar;// 调节文字间距的SeekBar
+
+    private DrawerLayout mDrawerLayout;//操作抽屉
+    private NavigationView mNavigationView;//左侧用于展示目录的抽屉
+    private RecyclerView mRecyclerView;//展示目录
+    private CatalogueAdapter mCatalogueAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,10 +70,17 @@ public class ExtendReaderActivity extends AppCompatActivity implements View.OnCl
         mMenuView = findViewById(R.id.menu_view);
         mSettingView = findViewById(R.id.setting_view);
         mChapterSeekBar = findViewById(R.id.chapter_seek_bar);
-        mLightSeekBar = findViewById(R.id.light_seek_bar);
-        mTextSizeSeekBar = findViewById(R.id.text_size_seek_bar);
-        mTextSpaceSeekBar = findViewById(R.id.text_space_seek_bar);
+        // 调节亮度的SeekBar
+        SeekBar lightSeekBar = findViewById(R.id.light_seek_bar);
+        //调节字号的SeekBar
+        SeekBar textSizeSeekBar = findViewById(R.id.text_size_seek_bar);
+        // 调节文字间距的SeekBar
+        SeekBar textSpaceSeekBar = findViewById(R.id.text_space_seek_bar);
 
+        mDrawerLayout = findViewById(R.id.drawerLayout);
+        mNavigationView = findViewById(R.id.navigation);
+        mRecyclerView = findViewById(R.id.recyclerView);
+        initRecyclerViewAndDrawerLayout();
 
         findViewById(R.id.setting).setOnClickListener(this);//设置
         findViewById(R.id.text_prev_chapter).setOnClickListener(this);//上一章
@@ -92,36 +107,71 @@ public class ExtendReaderActivity extends AppCompatActivity implements View.OnCl
             }
         });
 
-        mLightSeekBar.setOnSeekBarChangeListener(new SimpleOnSeekBarChangeListener() {
+        lightSeekBar.setOnSeekBarChangeListener(new SimpleOnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 ScreenUtils.changeAppBrightness(ExtendReaderActivity.this, progress);
             }
         });
 
-        mTextSizeSeekBar.setOnSeekBarChangeListener(new SimpleOnSeekBarChangeListener() {
+        textSizeSeekBar.setOnSeekBarChangeListener(new SimpleOnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 mReaderView.setTextSize(progress + 20);//文字大小限制最小20
             }
         });
 
-        mTextSpaceSeekBar.setOnSeekBarChangeListener(new SimpleOnSeekBarChangeListener() {
+        textSpaceSeekBar.setOnSeekBarChangeListener(new SimpleOnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 mReaderView.setLineSpace(progress);
             }
         });
 
-        mLightSeekBar.setMax(255);
-        mTextSizeSeekBar.setMax(100);
-        mTextSpaceSeekBar.setMax(200);
+        lightSeekBar.setMax(255);
+        textSizeSeekBar.setMax(100);
+        textSpaceSeekBar.setMax(200);
 
         // 初始化SeekBar位置
         mChapterSeekBar.setProgress(0);// 如果需要历史纪录的话，可以在这里实现
-        mLightSeekBar.setProgress(ScreenUtils.getSystemBrightness(this));
-        mTextSizeSeekBar.setProgress(mReaderView.getTextSize() - 20);
-        mTextSpaceSeekBar.setProgress(mReaderView.getLineSpace());
+        lightSeekBar.setProgress(ScreenUtils.getSystemBrightness(this));
+        textSizeSeekBar.setProgress(mReaderView.getTextSize() - 20);
+        textSpaceSeekBar.setProgress(mReaderView.getLineSpace());
+    }
+
+    private void initRecyclerViewAndDrawerLayout() {
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mCatalogueAdapter = new CatalogueAdapter(new CatalogueAdapter.OnItemClickListener() {
+            @Override
+            public void onClicked(int position) {
+                mReaderManager.toSpecifiedChapter(position, 0);
+                mDrawerLayout.closeDrawer(mNavigationView);
+            }
+        });
+        mRecyclerView.setAdapter(mCatalogueAdapter);
+
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);// 不响应滑动打开
+        // 这个订阅目的:当抽屉打开时可以滑动关闭,未打开时不能滑动打开
+        mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(@NonNull View view, float v) {
+
+            }
+
+            @Override
+            public void onDrawerOpened(@NonNull View view) {
+                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+            }
+
+            @Override
+            public void onDrawerClosed(@NonNull View view) {
+                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+            }
+
+            @Override
+            public void onDrawerStateChanged(int i) {
+            }
+        });
     }
 
     private void initToolbar() {
@@ -158,7 +208,7 @@ public class ExtendReaderActivity extends AppCompatActivity implements View.OnCl
     private void initReader() {
         mReaderView = findViewById(R.id.extend_reader);
         mReaderManager = new ReaderView.ReaderManager();
-        mAdapter = new MyAdapter();
+        mAdapter = new MyReaderAdapter();
 
         mReaderView.setReaderManager(mReaderManager);
         mReaderView.setAdapter(mAdapter);
@@ -191,6 +241,7 @@ public class ExtendReaderActivity extends AppCompatActivity implements View.OnCl
                 mAdapter.setChapterList(chapters);
                 mAdapter.notifyDataSetChanged();
                 mChapterSeekBar.setMax(chapters.size() - 1);
+                mCatalogueAdapter.setList(chapters);
             }
 
             @Override
@@ -220,7 +271,7 @@ public class ExtendReaderActivity extends AppCompatActivity implements View.OnCl
             case MotionEvent.ACTION_UP:
                 if (System.currentTimeMillis() - mDownTime < longClickTime && (Math.abs(ev.getX() - mDownX) < touchSlop)) {
 
-                    if (!mMenuView.isShowing() && !mSettingView.isShowing()) {
+                    if (!mMenuView.isShowing() && !mSettingView.isShowing() && !mDrawerLayout.isDrawerOpen(mNavigationView)) {
                         Log.d(TAG, "show menuView!");
                         mMenuView.show();
                         return true;
@@ -261,6 +312,8 @@ public class ExtendReaderActivity extends AppCompatActivity implements View.OnCl
                 }
                 break;
             case R.id.reader_catalogue://目录
+                mDrawerLayout.openDrawer(mNavigationView);
+                mMenuView.dismiss();
                 break;
             // 切换背景
             case R.id.reader_bg_0:
@@ -293,6 +346,22 @@ public class ExtendReaderActivity extends AppCompatActivity implements View.OnCl
                 break;
 
             // 日间/夜间模式的切换可参考：https://www.jianshu.com/p/ef3d05809dce
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        /*
+         * 返回时,依次关闭目录,设置,菜单
+         */
+        if (mDrawerLayout.isDrawerOpen(mNavigationView)) {
+            mDrawerLayout.closeDrawer(mNavigationView);
+        } else if (mSettingView.isShowing()) {
+            mSettingView.dismiss();
+        } else if (mMenuView.isShowing()) {
+            mMenuView.dismiss();
+        } else {
+            super.onBackPressed();
         }
     }
 }

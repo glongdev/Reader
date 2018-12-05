@@ -1,0 +1,12 @@
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/catalogue_item_text"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/qb_px_124"
+    android:layout_marginLeft="@dimen/qb_px_30"
+    android:layout_marginBottom="@dimen/qb_px_2"
+    android:ellipsize="end"
+    android:gravity="center_vertical"
+    android:lines="1"
+    android:text="11"
+    android:textColor="#000000"
+    android:textSize="@dimen/qb_px_40" />

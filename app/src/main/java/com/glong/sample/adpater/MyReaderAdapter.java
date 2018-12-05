@@ -9,7 +9,7 @@ import com.glong.sample.localtest.LocalServer;
  * Created by Garrett on 2018/11/28.
  * contact me krouky@outlook.com
  */
-public class MyAdapter extends ReaderView.Adapter<ChapterItemBean, ChapterContentBean> {
+public class MyReaderAdapter extends ReaderView.Adapter<ChapterItemBean, ChapterContentBean> {
     @Override
     public String obtainCacheKey(ChapterItemBean chapterItemBean) {
         return chapterItemBean.getChapterId() + "userId";
