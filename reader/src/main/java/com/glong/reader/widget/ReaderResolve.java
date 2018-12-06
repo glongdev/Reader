@@ -156,7 +156,7 @@ public class ReaderResolve {
     /**
      * 根据字符索引计算页码
      */
-    private void calculatePageIndex() {
+    protected void calculatePageIndex() {
         DLog.d(TAG, " start calculatePageIndex --- charIndex: " + mCharIndex + " showLines.size == " + mShowLines.size());
         if (mCharIndex == FIRST_INDEX) {
             mPageIndex = 0;
