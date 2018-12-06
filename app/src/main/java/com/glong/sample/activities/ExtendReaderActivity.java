@@ -1,5 +1,6 @@
 package com.glong.sample.activities;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -29,14 +30,20 @@ import com.glong.sample.R;
 import com.glong.sample.ScreenUtils;
 import com.glong.sample.adpater.CatalogueAdapter;
 import com.glong.sample.adpater.MyReaderAdapter;
-import com.glong.sample.entry.ChapterContentBean;
+import com.glong.sample.api.Api;
+import com.glong.sample.api.Service;
+import com.glong.sample.entry.ChapterContent2Bean;
 import com.glong.sample.entry.ChapterItemBean;
-import com.glong.sample.localtest.LocalServer;
+import com.glong.sample.entry.Result;
 import com.glong.sample.view.MenuView;
 import com.glong.sample.view.SettingView;
 import com.glong.sample.view.SimpleOnSeekBarChangeListener;
 
 import java.util.List;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 public class ExtendReaderActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -44,7 +51,7 @@ public class ExtendReaderActivity extends AppCompatActivity implements View.OnCl
 
     private ReaderView mReaderView;
     private ReaderView.ReaderManager mReaderManager;
-    private ReaderView.Adapter<ChapterItemBean, ChapterContentBean> mAdapter;
+    private ReaderView.Adapter<ChapterItemBean, ChapterContent2Bean> mAdapter;
 
     private MenuView mMenuView;// 菜单View
     private SettingView mSettingView;// 设置View
@@ -234,21 +241,20 @@ public class ExtendReaderActivity extends AppCompatActivity implements View.OnCl
         });
     }
 
+    @SuppressLint("CheckResult")
     private void initData() {
-        LocalServer.getChapterList("1", new LocalServer.OnResponseCallback() {
-            @Override
-            public void onSuccess(List<ChapterItemBean> chapters) {
-                mAdapter.setChapterList(chapters);
-                mAdapter.notifyDataSetChanged();
-                mChapterSeekBar.setMax(chapters.size() - 1);
-                mCatalogueAdapter.setList(chapters);
-            }
-
-            @Override
-            public void onError(Exception e) {
-
-            }
-        });
+        Api.getInstance().getService(Service.class).catalog(Api.KEY)
+                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Result<List<ChapterItemBean>>>() {
+                    @Override
+                    public void accept(Result<List<ChapterItemBean>> listResult) throws Exception {
+                        List<ChapterItemBean> chapters = listResult.getResult();
+                        mAdapter.setChapterList(chapters);
+                        mAdapter.notifyDataSetChanged();
+                        mChapterSeekBar.setMax(chapters.size() - 1);
+                        mCatalogueAdapter.setList(chapters);
+                    }
+                });
     }
 
     private long mDownTime;

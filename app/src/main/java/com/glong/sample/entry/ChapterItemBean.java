@@ -1,12 +1,17 @@
 package com.glong.sample.entry;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by Garrett on 2018/11/17.
  * contact me krouky@outlook.com
  */
 public class ChapterItemBean {
 
+    @SerializedName("id")
     private String chapterId;
+
+    @SerializedName("catalog")
     private String chapterName;
 
     public String getChapterId() {

@@ -7,7 +7,9 @@ package com.glong.sample.entry;
 public class ChapterContentBean {
 
     private String chapterId;
+
     private String chapterName;
+
     private String chapterContent;
 
     public String getChapterId() {

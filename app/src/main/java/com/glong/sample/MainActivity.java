@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
+import com.glong.sample.activities.CustomReaderActivity;
 import com.glong.sample.activities.ExtendReaderActivity;
 import com.glong.sample.activities.NormalReaderActivity;
 import com.glong.sample.activities.SimpleReaderActivity;
@@ -35,6 +36,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, ExtendReaderActivity.class));
+            }
+        });
+
+        findViewById(R.id.custom_reader).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, CustomReaderActivity.class));
             }
         });
     }
