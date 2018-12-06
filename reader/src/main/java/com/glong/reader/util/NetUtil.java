@@ -39,7 +39,7 @@ public class NetUtil {
         HttpURLConnection httpURLConnection = null;
         try {
             URL url = new URL(buildGetUrl(request.getBaseUrl(), request.getParam()));
-            openUrlConnection(url, httpURLConnection);
+            httpURLConnection = openUrlConnection(url);
             normalSetting(httpURLConnection, "GET", request.getHeaders());
             if (httpURLConnection == null) {
                 return null;
@@ -167,7 +167,7 @@ public class NetUtil {
         URL url = null;
         try {
             url = new URL(request.getBaseUrl());
-            openUrlConnection(url, httpURLConnection);
+            httpURLConnection = openUrlConnection(url);
             normalSetting(httpURLConnection, "POST", request.getHeaders());
 //            if (req.mMimeType != null) {// stats cache log request
 //                String data = (String) bodyPair.get("data");
@@ -205,7 +205,8 @@ public class NetUtil {
         return "";
     }
 
-    private static void openUrlConnection(URL url, HttpURLConnection httpURLConnection) throws IOException {
+    private static HttpURLConnection openUrlConnection(URL url) throws IOException {
+        HttpURLConnection httpURLConnection;
         String scheme = url.getProtocol();
         boolean isHttpsRequest = false;
         if ("https".equals(scheme)) {
@@ -218,7 +219,7 @@ public class NetUtil {
         } else {
             httpURLConnection = (HttpURLConnection) (url).openConnection();
         }
-
+        return httpURLConnection;
     }
 
     private static void addBodyParams(Map<String, Object> map, Map<String, FilePair> filePair, OutputStream outputStream, String boundary) throws IOException {
@@ -290,7 +291,7 @@ public class NetUtil {
         outputStream.close();
     }
 
-    public static Object download(Request request) {
+    public static String download(Request request) {
         if (request.getMethod().equals("GET")) {
             return get(request);
         } else if (request.getMethod().equals("POST")) {

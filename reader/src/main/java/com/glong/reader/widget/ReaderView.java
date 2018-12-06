@@ -23,6 +23,7 @@ import com.glong.reader.textconvert.TextBreakUtils;
 import com.glong.reader.util.DLog;
 import com.glong.reader.util.NetUtil;
 import com.glong.reader.util.Request;
+import com.google.gson.Gson;
 
 import java.io.File;
 import java.lang.reflect.ParameterizedType;
@@ -709,7 +710,11 @@ public class ReaderView extends View {
                     if (request == null) {
                         downLoad = adapter.downLoad(chapterItem);
                     } else {
-                        downLoad = NetUtil.download(request);
+                        ParameterizedType parameterizedType = (ParameterizedType) adapter.getClass().getGenericSuperclass();
+                        Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+                        String downloadStr = NetUtil.download(request);
+                        DLog.d("guolong", "downloadStr :" + downloadStr + " ,type:" + actualTypeArguments[1]);
+                        downLoad = new Gson().fromJson(downloadStr, actualTypeArguments[1]);
                     }
 
                     if (downLoad != null) {

@@ -49,8 +49,8 @@ public class ReaderResolve {
     // 总章节数
     protected int mChapterSum;
 
-    private int mAreaWidth;
-    private int mAreaHeight;
+    protected int mAreaWidth;
+    protected int mAreaHeight;
 
     // 电池电量
     private int mBattery = 50;
@@ -71,10 +71,10 @@ public class ReaderResolve {
 
     /****************************通过计算的属性end*************************************/
 
-    private Paint mMainBodyPaint = new Paint(Paint.ANTI_ALIAS_FLAG);//正文的画笔
-    private Paint mMarginPaint = new Paint(Paint.ANTI_ALIAS_FLAG);//画边缘的画笔，如：页码、章节名称、电池等
-    private Paint mChapterPaint = new Paint(Paint.ANTI_ALIAS_FLAG);// 画章节名称的Paint
-    private Paint mBatteryPaint = new Paint(Paint.ANTI_ALIAS_FLAG);// 画电池的画笔
+    protected Paint mMainBodyPaint = new Paint(Paint.ANTI_ALIAS_FLAG);//正文的画笔
+    protected Paint mMarginPaint = new Paint(Paint.ANTI_ALIAS_FLAG);//画边缘的画笔，如：页码、章节名称、电池等
+    protected Paint mChapterPaint = new Paint(Paint.ANTI_ALIAS_FLAG);// 画章节名称的Paint
+    protected Paint mBatteryPaint = new Paint(Paint.ANTI_ALIAS_FLAG);// 画电池的画笔
 
     protected SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", Locale.CHINA);
 
@@ -83,7 +83,7 @@ public class ReaderResolve {
     /**
      * 界面布局配置，此处依赖{@link ReaderConfig}是因为需要使用TextSize计算总页数
      */
-    private ReaderConfig mReaderConfig;
+    protected ReaderConfig mReaderConfig;
 
     public ReaderResolve() {
         // set a default ReaderConfig
@@ -324,7 +324,7 @@ public class ReaderResolve {
      * @param y           baseline
      * @param marginPaint Paint
      */
-    private void drawPercentage(Canvas canvas, float percent, float x, float y, Paint marginPaint) {
+    protected void drawPercentage(Canvas canvas, float percent, float x, float y, Paint marginPaint) {
         if (percent <= 100)
             canvas.drawText(decimalFormat.format(percent) + "%", x, y, marginPaint);
     }
