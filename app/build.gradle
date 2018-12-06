@@ -1,6 +1,22 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        release {
+            keyAlias 'guolong'
+            keyPassword '123456'
+            storeFile file('D:\\glong.jks')
+            storePassword '123456'
+        }
+
+        debug {
+            keyAlias 'guolong'
+            keyPassword '123456'
+            storeFile file('D:\\glong.jks')
+            storePassword '123456'
+        }
+    }
+
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.glong.sample"

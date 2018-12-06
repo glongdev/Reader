@@ -151,7 +151,10 @@ public class ExtendReaderActivity extends AppCompatActivity implements View.OnCl
         mCatalogueAdapter = new CatalogueAdapter(new CatalogueAdapter.OnItemClickListener() {
             @Override
             public void onClicked(int position) {
-                mReaderManager.toSpecifiedChapter(position, 0);
+                TurnStatus turnStatus = mReaderManager.toSpecifiedChapter(position, 0);
+                if (turnStatus == TurnStatus.LOAD_SUCCESS) {
+                    mReaderView.invalidateBothPage();
+                }
                 mDrawerLayout.closeDrawer(mNavigationView);
             }
         });

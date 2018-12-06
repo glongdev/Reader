@@ -54,12 +54,15 @@ public class CustomReaderActivity extends AppCompatActivity {
 
             @Override
             public String obtainChapterName(ChapterItemBean chapterItemBean) {
-                return chapterItemBean.getChapterName();
+                return "龟虽寿";//chapterItemBean.getChapterName();
             }
 
             @Override
             public String obtainChapterContent(ChapterContentBean chapterContentBean) {
-                return chapterContentBean.getChapterContent();
+                return "曹操</p>" + "神龟虽寿，犹有竟时；</p>" + "腾蛇乘雾，终为土灰。</p>"
+                        + "老骥伏枥，志在千里；</p>" + "烈士暮年，壮心不已。</p>"
+                        + "盈缩之期，不但在天；</p>" + "养怡之福，可得永年。</p>"
+                        + "幸甚至哉，歌以咏志。";
             }
 
             @Override
@@ -70,5 +73,6 @@ public class CustomReaderActivity extends AppCompatActivity {
 
         mReaderView.setAdapter(mAdapter);
         readerManager.setCustomReaderResolve(new MyReaderResolve());
+        mReaderView.setLineSpace(50);
     }
 }
