@@ -1,6 +1,5 @@
 package com.glong.sample.activities;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -41,8 +40,9 @@ import com.glong.sample.view.SimpleOnSeekBarChangeListener;
 
 import java.util.List;
 
+import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class ExtendReaderActivity extends AppCompatActivity implements View.OnClickListener {
@@ -244,20 +244,44 @@ public class ExtendReaderActivity extends AppCompatActivity implements View.OnCl
         });
     }
 
-    @SuppressLint("CheckResult")
+    private Disposable mDisposable;
+
     private void initData() {
         Api.getInstance().getService(Service.class).catalog(Api.KEY)
                 .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<Result<List<ChapterItemBean>>>() {
+                .subscribe(new Observer<Result<List<ChapterItemBean>>>() {
                     @Override
-                    public void accept(Result<List<ChapterItemBean>> listResult) throws Exception {
+                    public void onSubscribe(Disposable d) {
+                        mDisposable = d;
+                    }
+
+                    @Override
+                    public void onNext(Result<List<ChapterItemBean>> listResult) {
                         List<ChapterItemBean> chapters = listResult.getResult();
-                        mAdapter.setChapterList(chapters);
-                        mAdapter.notifyDataSetChanged();
-                        mChapterSeekBar.setMax(chapters.size() - 1);
-                        mCatalogueAdapter.setList(chapters);
+                        if (chapters != null) {
+                            mAdapter.setChapterList(chapters);
+                            mAdapter.notifyDataSetChanged();
+                            mChapterSeekBar.setMax(chapters.size() - 1);
+                            mCatalogueAdapter.setList(chapters);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                    }
+
+                    @Override
+                    public void onComplete() {
                     }
                 });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mDisposable != null && !mDisposable.isDisposed()) {
+            mDisposable.dispose();
+        }
     }
 
     private long mDownTime;

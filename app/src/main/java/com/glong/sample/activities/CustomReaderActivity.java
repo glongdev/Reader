@@ -1,7 +1,11 @@
 package com.glong.sample.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Toast;
 
 import com.glong.reader.widget.ReaderView;
 import com.glong.sample.R;
@@ -62,7 +66,22 @@ public class CustomReaderActivity extends AppCompatActivity {
                 return "曹操</p>" + "神龟虽寿，犹有竟时；</p>" + "腾蛇乘雾，终为土灰。</p>"
                         + "老骥伏枥，志在千里；</p>" + "烈士暮年，壮心不已。</p>"
                         + "盈缩之期，不但在天；</p>" + "养怡之福，可得永年。</p>"
-                        + "幸甚至哉，歌以咏志。";
+                        + "幸甚至哉，歌以咏志。</p>"
+                        +
+                        "曹操</p>" + "神龟虽寿，犹有竟时；</p>" + "腾蛇乘雾，终为土灰。</p>"
+                        + "老骥伏枥，志在千里；</p>" + "烈士暮年，壮心不已。</p>"
+                        + "盈缩之期，不但在天；</p>" + "养怡之福，可得永年。</p>"
+                        + "幸甚至哉，歌以咏志。</p>"
+                        +
+                        "曹操</p>" + "神龟虽寿，犹有竟时；</p>" + "腾蛇乘雾，终为土灰。</p>"
+                        + "老骥伏枥，志在千里；</p>" + "烈士暮年，壮心不已。</p>"
+                        + "盈缩之期，不但在天；</p>" + "养怡之福，可得永年。</p>"
+                        + "幸甚至哉，歌以咏志。</p>"
+                        +
+                        "曹操</p>" + "神龟虽寿，犹有竟时；</p>" + "腾蛇乘雾，终为土灰。</p>"
+                        + "老骥伏枥，志在千里；</p>" + "烈士暮年，壮心不已。</p>"
+                        + "盈缩之期，不但在天；</p>" + "养怡之福，可得永年。</p>"
+                        + "幸甚至哉，歌以咏志。</p>";
             }
 
             @Override
@@ -74,5 +93,23 @@ public class CustomReaderActivity extends AppCompatActivity {
         mReaderView.setAdapter(mAdapter);
         readerManager.setCustomReaderResolve(new MyReaderResolve());
         mReaderView.setLineSpace(50);
+
+        View firstPageView = LayoutInflater.from(this).inflate(R.layout.first_page_view_layout, null);
+        firstPageView.findViewById(R.id.imageView).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(CustomReaderActivity.this, "You clicked ImageView!", Toast.LENGTH_SHORT).show();
+            }
+        });
+        mReaderView.addView(firstPageView, ReaderView.ChildInPage.FIRST_PAGE);
+
+        View lastPageView = LayoutInflater.from(this).inflate(R.layout.last_page_view_layout, null);
+        lastPageView.findViewById(R.id.imageView2).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(CustomReaderActivity.this, WebViewActivity.class));
+            }
+        });
+        mReaderView.addView(lastPageView, ReaderView.ChildInPage.LAST_PAGE);
     }
 }

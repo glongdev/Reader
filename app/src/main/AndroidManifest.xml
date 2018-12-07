@@ -28,7 +28,8 @@
         <activity
             android:name=".activities.ExtendReaderActivity"
             android:theme="@style/NoActionTheme" />
-        <activity android:name=".activities.CustomReaderActivity"></activity>
+        <activity android:name=".activities.CustomReaderActivity" />
+        <activity android:name=".activities.WebViewActivity"></activity>
     </application>
 
 </manifest>

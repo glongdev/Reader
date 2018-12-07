@@ -21,9 +21,10 @@
 
     <TextView
         android:id="@+id/textView"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:background="@android:color/white"
+        android:layout_marginBottom="@dimen/qb_px_100"
         android:gravity="center"
         android:text="这是放在第一页的View,点我试一试哦"
         android:textColor="@android:color/black"
