@@ -6,4 +6,25 @@
     android:layout_height="match_parent"
     tools:context=".activities.PaperActivity">
 
+    <com.glong.sample.view.MyView
+        android:id="@+id/myView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#d8c9aa"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:max="100"
+        android:progress="50"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 </android.support.constraint.ConstraintLayout>

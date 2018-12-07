@@ -9,6 +9,7 @@ import android.view.View;
 import com.glong.sample.activities.CustomReaderActivity;
 import com.glong.sample.activities.ExtendReaderActivity;
 import com.glong.sample.activities.NormalReaderActivity;
+import com.glong.sample.activities.PaperActivity;
 import com.glong.sample.activities.SimpleReaderActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -43,6 +44,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, CustomReaderActivity.class));
+            }
+        });
+
+        findViewById(R.id.paper_reader).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, PaperActivity.class));
             }
         });
     }
