@@ -3,16 +3,25 @@ package com.glong.reader.widget;
 import android.content.Context;
 import android.database.Observable;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Shader;
 import android.os.BatteryManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.glong.reader.R;
 import com.glong.reader.ReaderSparseBooleanArray;
 import com.glong.reader.TurnStatus;
 import com.glong.reader.cache.Cache;
@@ -38,7 +47,7 @@ import static android.content.Context.BATTERY_SERVICE;
  * Created by Garrett on 2018/11/17.
  * contact me krouky@outlook.com
  */
-public class ReaderView extends View {
+public class ReaderView extends FrameLayout {
     private static final String TAG = "ReaderView";
 
     protected Canvas mCurrPageCanvas;
@@ -65,7 +74,8 @@ public class ReaderView extends View {
     private PageDrawingCallback mPageDrawingCallback;
 
     private AdapterDataObserver mObserver;
-    private boolean isCanTouch = true;
+
+    private boolean isOpenPaperEffect = true;
 
     public ReaderView(@NonNull Context context) {
         this(context, null);
@@ -77,12 +87,27 @@ public class ReaderView extends View {
 
     public ReaderView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        initPaper();
+        setWillNotDraw(false);
         mEffect = new EffectOfRealOneWay(context);
         mReaderConfig = new ReaderConfig.Builder().build();
         SimplePageChangedCallback simplePageChangedCallback = new SimplePageChangedCallback();
         mPageChangedCallback = simplePageChangedCallback;
         mPageDrawingCallback = simplePageChangedCallback;
         mObserver = new AdapterDataObserver();
+    }
+
+    private Paint mPaperPaint = new Paint();
+
+    private void initPaper() {
+        Bitmap noiseReg = BitmapFactory.decodeResource(getResources(), R.drawable.paper);
+        BitmapShader shader = new BitmapShader(noiseReg, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
+        Matrix matrix = new Matrix();
+
+        shader.setLocalMatrix(matrix);
+        mPaperPaint.setShader(shader);
+        mPaperPaint.setAlpha(120);
+        mPaperPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SCREEN));
     }
 
     @Override
@@ -118,23 +143,136 @@ public class ReaderView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (isCanTouch) {
-            if (mEffect.onTouchEvent(event)) {
-                return true;
-            }
+        if (mEffect.onTouchEvent(event)) {
+            return true;
         }
         return super.onTouchEvent(event);
     }
 
     @Override
+    protected void dispatchDraw(Canvas canvas) {
+        DLog.d("guolongDispatchDraw", "##########");
+        View firstPageView = null;
+        View lastPageView = null;
+        View eveyPageView = null;
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            ChildInPage childInPage = (ChildInPage) child.getTag();
+            if (childInPage == ChildInPage.FIRST_PAGE) {
+                firstPageView = child;
+            } else if (childInPage == ChildInPage.LAST_PAGE) {
+                lastPageView = child;
+            } else {
+                eveyPageView = child;
+            }
+        }
+        dispatchDrawCurrCanvas(firstPageView, lastPageView, eveyPageView);
+        dispatchDrawNextCanvas(firstPageView, lastPageView, eveyPageView);
+    }
+
+    private void dispatchDrawCurrCanvas(View firstPageView, View lastPageView, View eveyPageView) {
+        if (0 == mCurrCanvasPage) {
+            if (firstPageView != null)
+                firstPageView.setVisibility(View.VISIBLE);
+            if (lastPageView != null)
+                lastPageView.setVisibility(View.INVISIBLE);
+        } else if (mReaderManager.getReaderResolve().getPageSum() - 1 == mCurrCanvasPage) {
+            if (firstPageView != null)
+                firstPageView.setVisibility(View.INVISIBLE);
+            if (lastPageView != null)
+                lastPageView.setVisibility(View.VISIBLE);
+        } else {
+            if (firstPageView != null)
+                firstPageView.setVisibility(View.INVISIBLE);
+            if (lastPageView != null)
+                lastPageView.setVisibility(View.INVISIBLE);
+        }
+        boolean notDrawFirstView = firstPageView == null || firstPageView.getVisibility() != View.VISIBLE;
+        boolean notDrawLastView = lastPageView == null || lastPageView.getVisibility() != View.VISIBLE;
+        boolean notDrawEveyView = eveyPageView == null;
+        if (notDrawEveyView && notDrawFirstView && notDrawLastView) {
+            //不用画
+        } else {
+            super.dispatchDraw(mCurrPageCanvas);
+        }
+    }
+
+    private void dispatchDrawNextCanvas(View firstPageView, View lastPageView, View eveyPageView) {
+        if (0 == mNextCanvasPage) {
+            if (firstPageView != null)
+                firstPageView.setVisibility(View.VISIBLE);
+            if (lastPageView != null)
+                lastPageView.setVisibility(View.INVISIBLE);
+        } else if (mReaderManager.getReaderResolve().getPageSum() - 1 == mNextCanvasPage) {
+            if (firstPageView != null)
+                firstPageView.setVisibility(View.INVISIBLE);
+            if (lastPageView != null)
+                lastPageView.setVisibility(View.VISIBLE);
+        } else {
+            if (firstPageView != null)
+                firstPageView.setVisibility(View.INVISIBLE);
+            if (lastPageView != null)
+                lastPageView.setVisibility(View.INVISIBLE);
+        }
+        boolean notDrawFirstView = firstPageView == null || firstPageView.getVisibility() != View.VISIBLE;
+        boolean notDrawLastView = lastPageView == null || lastPageView.getVisibility() != View.VISIBLE;
+        boolean notDrawEveyView = eveyPageView == null;
+        if (notDrawEveyView && notDrawFirstView && notDrawLastView) {
+            //不用画
+        } else {
+            super.dispatchDraw(mNextPageCanvas);
+        }
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        if (isOpenPaperEffect) {
+            canvas.drawPaint(mPaperPaint);
+        }
         mEffect.onDraw(canvas);
     }
 
     @Override
     public void computeScroll() {
         mEffect.computeScroll();
+    }
+
+    /**
+     * 给阅读器添加View
+     *
+     * @param child       子View
+     * @param childInPage 添加到哪一页？有三个可选项具体见{@link ChildInPage}
+     */
+    public void addView(View child, ChildInPage childInPage) {
+        checkIsAlreadyAddedInPage(childInPage);
+        child.setTag(childInPage);
+        super.addView(child);
+    }
+
+    /**
+     * 检查是否已经添加过这个页的View了
+     */
+    private void checkIsAlreadyAddedInPage(ChildInPage childInPage) {
+        for (int i = 0; i < getChildCount(); i++) {
+            ChildInPage currChildInPage = (ChildInPage) getChildAt(i).getTag();
+            if (currChildInPage == childInPage) {
+                throw new IllegalArgumentException("Already added" + childInPage.toString() + " View!");
+            }
+        }
+    }
+
+    /**
+     * 给阅读器添加子View
+     *
+     * @param child       子View
+     * @param params      FrameLayout的LayoutParams
+     * @param childInPage 添加到哪一页？有三个可选项具体见{@link ChildInPage}
+     */
+    public void addView(View child, ViewGroup.LayoutParams params, ChildInPage childInPage) {
+        checkIsAlreadyAddedInPage(childInPage);
+        child.setTag(childInPage);
+        super.addView(child, params);
     }
 
     public void invalidateCurrPage() {
@@ -346,14 +484,6 @@ public class ReaderView extends View {
         mEffect.setPageDrawingCallback(pageDrawingCallback);
     }
 
-    public boolean isCanTouch() {
-        return isCanTouch;
-    }
-
-    public void setCanTouch(boolean canTouch) {
-        isCanTouch = canTouch;
-    }
-
     /**
      * 增加分段符号
      *
@@ -361,6 +491,14 @@ public class ReaderView extends View {
      */
     public void addParagraph(String paragraph) {
         TextBreakUtils.sParagraph.add(paragraph);
+    }
+
+    public boolean isOpenPaperEffect() {
+        return isOpenPaperEffect;
+    }
+
+    public void setOpenPaperEffect(boolean openPaperEffect) {
+        isOpenPaperEffect = openPaperEffect;
     }
 
     /**
@@ -381,7 +519,10 @@ public class ReaderView extends View {
         private List<K> mChapterList;
 
         public void setChapterList(List<K> chapters) {
-            DLog.d(this.TAG, "setChapterList ,listSize : " + chapters.size());
+            if (chapters == null) {
+                return;
+            }
+            DLog.d(TAG, "setChapterList ,listSize : " + chapters.size());
             this.mChapterList = chapters;
         }
 
@@ -840,6 +981,9 @@ public class ReaderView extends View {
         public abstract void onChanged();
     }
 
+    private int mNextCanvasPage;
+    private int mCurrCanvasPage;
+
     //提供一个简单的PageChangedCallback的实现
     public class SimplePageChangedCallback implements PageChangedCallback, PageDrawingCallback {
 
@@ -852,12 +996,14 @@ public class ReaderView extends View {
         public void drawCurrPage() {
             checkReaderManagerNonNull();
             ReaderView.this.mReaderManager.drawPage(ReaderView.this.mCurrPageCanvas);
+            mCurrCanvasPage = mReaderManager.getReaderResolve().getPageIndex();
         }
 
         @Override
         public void drawNextPage() {
             checkReaderManagerNonNull();
             ReaderView.this.mReaderManager.drawPage(ReaderView.this.mNextPageCanvas);
+            mNextCanvasPage = mReaderManager.getReaderResolve().getPageIndex();
         }
 
         @Override
@@ -871,5 +1017,14 @@ public class ReaderView extends View {
             checkReaderManagerNonNull();
             return ReaderView.this.mReaderManager.toNextPage();
         }
+    }
+
+    public enum ChildInPage {
+        // 添加到第0页
+        FIRST_PAGE,
+        // 添加到每一页
+        EVERY_PAGE,
+        // 添加到最后一页
+        LAST_PAGE
     }
 }
