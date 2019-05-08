@@ -11,6 +11,7 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Region;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
 import android.view.MotionEvent;
 
 import com.glong.reader.TurnStatus;
@@ -375,7 +376,11 @@ public class EffectOfRealOneWay extends Effect {
         mPath0.lineTo(mCornerX, mCornerY);
         mPath0.close();
         canvas.save();
-        canvas.clipPath(mPath0, Region.Op.XOR);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            canvas.clipOutPath(mPath0);
+        } else {
+            canvas.clipPath(mPath0, Region.Op.DIFFERENCE);
+        }
         canvas.drawBitmap(bmp, 0, 0, null);
         canvas.restore();
     }
@@ -419,7 +424,7 @@ public class EffectOfRealOneWay extends Effect {
 
         canvas.save();
         canvas.clipPath(mPath0);
-        canvas.clipPath(mPath1, Region.Op.INTERSECT);
+        canvas.clipPath(mPath1);
         canvas.drawBitmap(bmp, 0, 0, null);
 
         canvas.rotate(mDegrees, mBezierStart1.x, mBezierStart1.y);
@@ -466,8 +471,12 @@ public class EffectOfRealOneWay extends Effect {
 
         float rotateDegrees;
         canvas.save();
-        canvas.clipPath(mPath0, Region.Op.XOR);
-        canvas.clipPath(mPath1, Region.Op.INTERSECT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            canvas.clipOutPath(mPath0);
+        } else {
+            canvas.clipPath(mPath0, Region.Op.DIFFERENCE);
+        }
+        canvas.clipPath(mPath1);
         int leftx;
         int rightx;
         GradientDrawable currentPageShadow;
@@ -497,8 +506,12 @@ public class EffectOfRealOneWay extends Effect {
         mPath1.lineTo(mBezierStart2.x, mBezierStart2.y);
         mPath1.close();
         canvas.save();
-        canvas.clipPath(mPath0, Region.Op.XOR);
-        canvas.clipPath(mPath1, Region.Op.INTERSECT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            canvas.clipOutPath(mPath0);
+        } else {
+            canvas.clipPath(mPath0, Region.Op.DIFFERENCE);
+        }
+        canvas.clipPath(mPath1);
         if (mIsRTandLB) {
             leftx = (int) (mBezierControl2.y);
             rightx = (int) (mBezierControl2.y + 25);
@@ -567,7 +580,7 @@ public class EffectOfRealOneWay extends Effect {
 
         canvas.save();
         canvas.clipPath(mPath0);
-        canvas.clipPath(mPath1, Region.Op.INTERSECT);
+        canvas.clipPath(mPath1);
 
         //需要求出 点(x,y)关于直线(mBezierControl1, mBezierControl2)的对称点坐标，
         //进而根据坐标变换求出当前页翻起的矩阵变换方程

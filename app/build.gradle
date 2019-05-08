@@ -3,17 +3,17 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
         release {
-            keyAlias 'guolong'
-            keyPassword '123456'
-            storeFile file('D:\\glong.jks')
-            storePassword '123456'
+            keyAlias 'test'
+            keyPassword 'test123'
+            storeFile file('../debug.jks')
+            storePassword 'test123'
         }
 
         debug {
-            keyAlias 'guolong'
-            keyPassword '123456'
-            storeFile file('D:\\glong.jks')
-            storePassword '123456'
+            keyAlias 'test'
+            keyPassword 'test123'
+            storeFile file('../debug.jks')
+            storePassword 'test123'
         }
     }
 
@@ -52,6 +52,6 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.4.0'
     // 异步框架RxJava2 RxAndroid2
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.1'
-    implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.7'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
 }
